@@ -1,0 +1,298 @@
+
+/* =========================================
+   APEX F1 — CHAMPIONSHIP
+   File: css/championship.css
+   ========================================= */
+
+/* 1. Championship page */
+#championship-page {
+  width: 100%;
+  min-width: 0;
+}
+
+#championship-page h1 {
+  margin-bottom: var(--space-2);
+}
+
+#championship-page .intro {
+  color: var(--muted);
+  margin-bottom: var(--space-6);
+  max-width: 700px;
+}
+
+/* 2. Page toolbar */
+#championship-page .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+#championship-page #raceName {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#championship-page .status {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+}
+
+/* 3. Standings grid */
+#championship-page .grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: start;
+}
+
+/* 4. Championship panels */
+#championship-page .panel {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+}
+
+#championship-page .panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--line);
+}
+
+#championship-page .panel-head h2 {
+  font-size: var(--text-lg);
+  line-height: 1.3;
+}
+
+/* 5. Section tags */
+#championship-page .tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  padding: 4px 8px;
+
+  color: var(--danger);
+  background: var(--red-soft);
+  border: 1px solid rgb(225 6 0 / 20%);
+  border-radius: var(--radius-sm);
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+/* 6. Table container */
+#championship-page .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+#championship-page table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  white-space: nowrap;
+}
+
+/* Table headings */
+#championship-page thead {
+  background: rgb(255 255 255 / 2%);
+}
+
+#championship-page th {
+  padding: 13px 16px;
+
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  text-align: left;
+
+  border-bottom: 1px solid var(--line);
+}
+
+/* Table cells */
+#championship-page td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+#championship-page tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+#championship-page tbody tr {
+  transition: background var(--transition-fast);
+}
+
+#championship-page tbody tr:hover {
+  background: var(--panel-hover);
+}
+
+/* 7. Position */
+#championship-page .pos {
+  width: 48px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Highlight first three positions */
+#championship-page tbody tr:nth-child(1) .pos {
+  color: #f4d36b;
+}
+
+#championship-page tbody tr:nth-child(2) .pos {
+  color: #c6ccd6;
+}
+
+#championship-page tbody tr:nth-child(3) .pos {
+  color: #cd9368;
+}
+
+/* 8. Driver and constructor names */
+#championship-page .name {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+#championship-page .sub {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+/* Team color indicator */
+#championship-page .team-mark {
+  display: inline-block;
+  width: 3px;
+  min-width: 3px;
+  height: 28px;
+
+  margin-right: 10px;
+  vertical-align: middle;
+
+  border-radius: var(--radius-pill);
+  background: var(--line-strong);
+}
+
+/* 9. Championship points */
+#championship-page th:last-child,
+#championship-page td:last-child {
+  text-align: right;
+}
+
+#championship-page .points {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* 10. Loading and empty states */
+#championship-page .empty {
+  padding: 28px 20px;
+  color: var(--muted);
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+#championship-page .error {
+  padding: 20px;
+  color: var(--danger);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+
+/* 11. Refresh button */
+#championship-page #refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  min-height: 40px;
+  padding: 10px 16px;
+
+  background: var(--red);
+  color: #fff;
+  border: 1px solid var(--red);
+  border-radius: var(--radius-md);
+
+  font-size: 13px;
+  font-weight: 700;
+
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+#championship-page #refresh:hover:not(:disabled) {
+  background: var(--red-hover);
+  border-color: var(--red-hover);
+}
+
+#championship-page #refresh:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* 12. Tablet */
+@media (max-width: 1000px) {
+  #championship-page .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 13. Mobile */
+@media (max-width: 600px) {
+  #championship-page .toolbar {
+    align-items: flex-start;
+  }
+
+  #championship-page .panel-head {
+    padding: var(--space-4);
+  }
+
+  #championship-page th {
+    padding: 12px;
+    font-size: 10px;
+  }
+
+  #championship-page td {
+    padding: 12px;
+  }
+
+  #championship-page .points {
+    font-size: 16px;
+  }
+
+  #championship-page .name {
+    font-size: 13px;
+  }
+
+  #championship-page #refresh {
+    width: 100%;
+  }
+}

@@ -1,0 +1,318 @@
+
+/* ============================================
+   APEX F1 — RACE RESULTS
+   File: css/race-results.css
+   ============================================ */
+
+/* --------------------------------------------
+   Results table container
+   -------------------------------------------- */
+
+.results-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.results-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+/* --------------------------------------------
+   Table header
+   -------------------------------------------- */
+
+.results-table thead {
+  background: var(--surface-alt, #20232b);
+}
+
+.results-table thead th {
+  padding: 14px 12px;
+  color: var(--text-muted, #a0a5b1);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border-color, #343843);
+}
+
+/* --------------------------------------------
+   Table body
+   -------------------------------------------- */
+
+.results-table tbody tr {
+  border-bottom: 1px solid var(--border-color, #2b2f38);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.results-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.results-table tbody tr:hover {
+  background: var(--surface-hover, rgba(255, 255, 255, 0.045));
+}
+
+.results-table tbody td {
+  padding: 13px 12px;
+  color: var(--text-color, #e8eaf0);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------
+   Position
+   -------------------------------------------- */
+
+.result-position {
+  width: 60px;
+  font-size: 1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.results-table tbody tr:first-child .result-position {
+  color: #f5c542;
+}
+
+.results-table tbody tr:nth-child(2) .result-position {
+  color: #c5ccd6;
+}
+
+.results-table tbody tr:nth-child(3) .result-position {
+  color: #cd8b55;
+}
+
+/* --------------------------------------------
+   Driver number
+   -------------------------------------------- */
+
+.result-driver-number {
+  width: 55px;
+  color: var(--text-muted, #a0a5b1) !important;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------
+   Driver
+   -------------------------------------------- */
+
+.result-driver {
+  min-width: 190px;
+}
+
+.result-driver-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-driver-info strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.result-driver-info small {
+  color: var(--text-muted, #a0a5b1);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.result-team-color {
+  display: inline-block;
+  width: 4px;
+  min-width: 4px;
+  height: 30px;
+  margin-right: 9px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+/* --------------------------------------------
+   Team
+   -------------------------------------------- */
+
+.result-team {
+  min-width: 145px;
+  color: var(--text-muted, #a0a5b1) !important;
+  font-size: 0.82rem;
+}
+
+/* --------------------------------------------
+   Time and gap
+   -------------------------------------------- */
+
+.result-time,
+.result-gap,
+.result-laps {
+  font-variant-numeric: tabular-nums;
+}
+
+.result-time {
+  font-weight: 600;
+}
+
+.result-gap {
+  color: var(--text-muted, #a0a5b1) !important;
+  font-size: 0.82rem;
+}
+
+.result-laps {
+  text-align: center;
+}
+
+/* --------------------------------------------
+   Status badges
+   -------------------------------------------- */
+
+.result-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Finished */
+
+.result-finished {
+  color: #39d98a;
+  background: rgba(57, 217, 138, 0.1);
+  border-color: rgba(57, 217, 138, 0.25);
+}
+
+/* Did Not Finish */
+
+.result-dnf {
+  color: #ff8b70;
+  background: rgba(255, 107, 107, 0.12);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+/* Did Not Start */
+
+.result-dns {
+  color: #ffbd69;
+  background: rgba(255, 189, 105, 0.12);
+  border-color: rgba(255, 189, 105, 0.3);
+}
+
+/* Disqualified */
+
+.result-dsq {
+  color: #ff6b81;
+  background: rgba(255, 59, 92, 0.13);
+  border-color: rgba(255, 59, 92, 0.35);
+}
+
+/* --------------------------------------------
+   Race results page controls
+   -------------------------------------------- */
+
+#race-results-page .schedule-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 14px;
+}
+
+#race-results-page .schedule-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+#race-results-page .schedule-controls select {
+  min-width: 160px;
+  max-width: 100%;
+}
+
+#race-results-page #resultsSession {
+  min-width: 240px;
+}
+
+#race-results-page #resultsRefresh {
+  white-space: nowrap;
+}
+
+/* --------------------------------------------
+   Empty and loading states
+   -------------------------------------------- */
+
+#race-results-page .empty {
+  padding: 28px 16px;
+  color: var(--text-muted, #a0a5b1);
+  text-align: center;
+}
+
+#race-results-page #resultsStatus {
+  margin-top: 10px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+#race-results-page #resultsStatus[data-state="error"] {
+  color: #ff8b70;
+}
+
+/* --------------------------------------------
+   Responsive
+   -------------------------------------------- */
+
+@media (max-width: 768px) {
+  .results-table {
+    min-width: 760px;
+    font-size: 0.82rem;
+  }
+
+  .results-table thead th {
+    padding: 11px 9px;
+    font-size: 0.66rem;
+  }
+
+  .results-table tbody td {
+    padding: 11px 9px;
+  }
+
+  #race-results-page .schedule-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #race-results-page .schedule-controls label,
+  #race-results-page .schedule-controls select,
+  #race-results-page #resultsRefresh {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* --------------------------------------------
+   Reduced motion
+   -------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .results-table tbody tr {
+    transition: none;
+  }
+}

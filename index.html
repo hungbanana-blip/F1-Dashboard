@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="APEX F1 championship standings, race schedule and race results dashboard."
+  >
+
+  <meta name="theme-color" content="#0b0d10">
+
+  <title>APEX F1 | Championship Dashboard</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/championship.css">
+  <link rel="stylesheet" href="./css/schedule.css">
+
+  <!-- Application entry point -->
+  <script type="module" src="./js/app.js"></script>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header id="app-header">
+    <div class="logo">
+      APEX <span>F1</span>
+    </div>
+
+    <small>CHAMPIONSHIP DASHBOARD</small>
+  </header>
+
+  <!-- MAIN NAVIGATION -->
+  <nav
+    id="main-navigation"
+    aria-label="Main navigation"
+  >
+    <button
+      id="navChamp"
+      class="active"
+      type="button"
+      aria-controls="championship-page"
+      aria-current="page"
+    >
+      Championship
+    </button>
+
+    <button
+      id="navSchedule"
+      class="secondary"
+      type="button"
+      aria-controls="schedule-page"
+    >
+      Schedule
+    </button>
+
+    <button
+      id="navRaceResults"
+      class="secondary"
+      type="button"
+      aria-controls="race-results-page"
+    >
+      Race Results
+    </button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <!-- CHAMPIONSHIP PAGE -->
+    <section
+      id="championship-page"
+      aria-labelledby="championship-heading"
+    >
+      <h1 id="championship-heading">
+        Championship Standings
+      </h1>
+
+      <p class="intro">
+        Driver and constructor points from the latest available race.
+      </p>
+
+      <div class="toolbar">
+        <div>
+          <div id="raceName" aria-live="polite">
+            Finding latest race...
+          </div>
+
+          <div
+            id="updated"
+            class="status"
+            role="status"
+            aria-live="polite"
+          >
+            Waiting for API response
+          </div>
+        </div>
+
+        <button
+          id="refresh"
+          type="button"
+          aria-label="Refresh championship data"
+        >
+          ↻ Refresh data
+        </button>
+      </div>
+
+      <div class="grid">
+        <!-- DRIVER CHAMPIONSHIP -->
+        <section
+          class="panel"
+          aria-labelledby="drivers-heading"
+        >
+          <div class="panel-head">
+            <h2 id="drivers-heading">
+              Drivers' Championship
+            </h2>
+
+            <span class="tag">DRIVERS</span>
+          </div>
+
+          <div id="drivers" aria-live="polite">
+            <div class="empty">
+              Loading drivers...
+            </div>
+          </div>
+        </section>
+
+        <!-- CONSTRUCTOR CHAMPIONSHIP -->
+        <section
+          class="panel"
+          aria-labelledby="teams-heading"
+        >
+          <div class="panel-head">
+            <h2 id="teams-heading">
+              Constructors' Championship
+            </h2>
+
+            <span class="tag">TEAMS</span>
+          </div>
+
+          <div id="teams" aria-live="polite">
+            <div class="empty">
+              Loading teams...
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- RACE SCHEDULE PAGE -->
+    <section
+      id="schedule-page"
+      aria-labelledby="schedule-heading"
+      hidden
+    >
+      <h1 id="schedule-heading">
+        Race Schedule
+      </h1>
+
+      <p class="intro">
+        F1 race sessions with customizable timezone conversion.
+      </p>
+
+      <section
+        class="panel"
+        aria-label="Schedule settings"
+      >
+        <div class="schedule-controls">
+          <label for="scheduleYear">
+            Season
+
+            <select
+              id="scheduleYear"
+              aria-label="Select F1 season"
+            >
+              <!-- Populated by schedule.js -->
+            </select>
+          </label>
+
+          <label for="timezone">
+            Timezone
+
+            <select
+              id="timezone"
+              aria-label="Select display timezone"
+            >
+              <option value="Asia/Ho_Chi_Minh">
+                GMT+7 · Vietnam
+              </option>
+
+              <option value="UTC">
+                UTC · GMT+0
+              </option>
+
+              <option value="Europe/London">
+                London
+              </option>
+
+              <option value="Europe/Paris">
+                Paris
+              </option>
+
+              <option value="America/New_York">
+                New York
+              </option>
+
+              <option value="America/Los_Angeles">
+                Los Angeles
+              </option>
+
+              <option value="Asia/Tokyo">
+                Tokyo · GMT+9
+              </option>
+
+              <option value="Australia/Melbourne">
+                Melbourne
+              </option>
+            </select>
+          </label>
+
+          <button
+            id="scheduleRefresh"
+            class="secondary"
+            type="button"
+          >
+            ↻ Refresh schedule
+          </button>
+        </div>
+
+        <div class="schedule-info">
+          <div
+            id="scheduleStatus"
+            class="status"
+            role="status"
+            aria-live="polite"
+          >
+            Select a season to load sessions.
+          </div>
+
+          <div
+            id="timezoneNote"
+            class="timezone-note"
+            aria-live="polite"
+          >
+            Times are converted to the selected timezone.
+          </div>
+        </div>
+      </section>
+
+      <!-- Race cards are rendered by schedule.js -->
+      <div
+        id="scheduleList"
+        class="schedule-list"
+        aria-live="polite"
+      >
+        <div class="panel">
+          <div class="empty">
+            Schedule has not been loaded yet.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RACE RESULTS PAGE -->
+    <section
+      id="race-results-page"
+      aria-labelledby="race-results-heading"
+      hidden
+    >
+      <h1 id="race-results-heading">
+        Race Results
+      </h1>
+
+      <p class="intro">
+        Final race classification, driver positions and points.
+      </p>
+
+      <!-- RACE RESULT FILTERS -->
+      <section
+        class="panel"
+        aria-label="Race result filters"
+      >
+        <div class="schedule-controls">
+          <label for="resultsYear">
+            Season
+
+            <select
+              id="resultsYear"
+              aria-label="Select results season"
+            >
+              <!-- Populated by race-results.js -->
+            </select>
+          </label>
+
+          <label for="resultsSession">
+            Grand Prix
+
+            <select
+              id="resultsSession"
+              aria-label="Select Grand Prix"
+            >
+              <option value="">
+                Select a Grand Prix
+              </option>
+            </select>
+          </label>
+
+          <button
+            id="resultsRefresh"
+            class="secondary"
+            type="button"
+            aria-label="Refresh race results"
+          >
+            ↻ Refresh results
+          </button>
+        </div>
+
+        <div class="schedule-info">
+          <div
+            id="resultsStatus"
+            class="status"
+            role="status"
+            aria-live="polite"
+          >
+            Select a Grand Prix to load race results.
+          </div>
+        </div>
+      </section>
+
+      <!-- RACE RESULT TABLE -->
+      <section
+        class="panel"
+        aria-labelledby="results-table-heading"
+      >
+        <div class="panel-head">
+          <h2 id="results-table-heading">
+            Final Classification
+          </h2>
+
+          <span class="tag">RACE RESULTS</span>
+        </div>
+
+        <div id="raceResults" aria-live="polite">
+          <div class="empty">
+            Race results have not been loaded yet.
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="app-footer">
+    <p>APEX F1 Championship Dashboard</p>
+
+    <p>
+      Data source: OpenF1 API.
+      Verify official session times before relying on them.
+    </p>
+  </footer>
+</body>
+</html>
