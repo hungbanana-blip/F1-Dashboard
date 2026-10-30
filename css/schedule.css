@@ -181,10 +181,10 @@
   border-color: var(--line-strong);
 }
 
-/* Last race */
+/* Next race */
 
-#schedule-page .race-card-last-race {
-  border-left: 3px solid var(--success);
+#schedule-page .race-card-next-race {
+  border-left: 3px solid var(--accent);
 }
 
 /* Live race */
@@ -232,12 +232,12 @@
   letter-spacing: 0.6px;
 }
 
-/* LAST RACE badge */
+/* NEXT RACE badge */
 
-#schedule-page .race-label-last-race {
-  color: #58d68d;
-  background: rgb(46 204 113 / 13%);
-  border: 1px solid rgb(46 204 113 / 25%);
+#schedule-page .race-label-next-race {
+  color: #8db8ff;
+  background: rgb(80 140 255 / 13%);
+  border: 1px solid rgb(80 140 255 / 25%);
 }
 
 /* LIVE badge */

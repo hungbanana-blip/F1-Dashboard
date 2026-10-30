@@ -262,39 +262,64 @@ function renderDrivers(drivers) {
     return;
   }
 
+  const teamColors = {
+    "Mercedes": "#00D2BE",
+    "Ferrari": "#E80020",
+    "Red Bull Racing": "#3671C6",
+    "McLaren": "#FF8000",
+    "Alpine": "#0093CC",
+    "Haas F1 Team": "#B6BABD",
+    "Racing Bulls": "#6692FF",
+    "RB": "#6692FF",
+    "Audi": "#D5001C",
+    "Williams": "#64C4FF",
+    "Aston Martin": "#229971",
+    "Cadillac": "#D6D6D6"
+  };
+
   const rows = drivers.map((driver, index) => {
     const position = Number.isFinite(driver.position)
       ? driver.position
       : index + 1;
 
+    const team = driver.team || "Unknown team";
+    const teamColor = teamColors[team] || "#777777";
+
     return `
-      <tr>
-        <td class="pos">${position}</td>
-        <td>
-          <div class="name">${escapeHTML(driver.name)}</div>
-          <div class="sub">${escapeHTML(driver.team)}</div>
-        </td>
-        <td class="points">${formatPoints(driver.points)}</td>
-      </tr>
+      <div class="driver-row">
+
+        <div class="driver-position">
+          ${position}
+        </div>
+
+        <div
+          class="driver-team-mark"
+          style="--team-color: ${teamColor}"
+        ></div>
+
+        <div class="driver-info">
+
+          <div class="driver-name">
+            ${escapeHTML(driver.name)}
+          </div>
+
+          <div class="driver-team">
+            ${escapeHTML(team)}
+          </div>
+
+        </div>
+
+        <div class="driver-points">
+          ${formatPoints(driver.points)}
+        </div>
+
+      </div>
     `;
   }).join("");
 
   setHTML(
     "drivers",
-    `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>POS</th>
-              <th>DRIVER</th>
-              <th class="points">PTS</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    `
+    `<div class="driver-list">${rows}</div>`
   );
 }
 
@@ -311,34 +336,184 @@ function renderTeams(teams) {
     return;
   }
 
+  // Team logos and colors.
+  // File extensions match the actual files in assets/teams/.
+  const teamAssets = {
+    "mercedes": {
+      logo: "mercedes.svg",
+      color: "#00D2BE",
+      shortName: "M"
+    },
+
+    "ferrari": {
+      logo: "ferrari.png",
+      color: "#E80020",
+      shortName: "F"
+    },
+
+    "red bull racing": {
+      logo: "redbull.webp",
+      color: "#3671C6",
+      shortName: "RB"
+    },
+
+    "red bull": {
+      logo: "redbull.webp",
+      color: "#3671C6",
+      shortName: "RB"
+    },
+
+    "mclaren": {
+      logo: "mclaren.webp",
+      color: "#FF8000",
+      shortName: "M"
+    },
+
+    "aston martin": {
+      logo: "astonmartin.png",
+      color: "#229971",
+      shortName: "AM"
+    },
+
+    "alpine": {
+      logo: "alpine.webp",
+      color: "#0093CC",
+      shortName: "A"
+    },
+
+    "williams": {
+      logo: "williams.webp",
+      color: "#64C4FF",
+      shortName: "W"
+    },
+
+    "racing bulls": {
+      logo: "racingbull.png",
+      color: "#6692FF",
+      shortName: "RB"
+    },
+
+    "rb": {
+      logo: "racingbull.png",
+      color: "#6692FF",
+      shortName: "RB"
+    },
+
+    "haas f1 team": {
+      logo: "haas.webp",
+      color: "#B6BABD",
+      shortName: "H"
+    },
+
+    "haas": {
+      logo: "haas.webp",
+      color: "#B6BABD",
+      shortName: "H"
+    },
+
+    "audi": {
+      logo: "audi.webp",
+      color: "#D5001C",
+      shortName: "A"
+    },
+
+    "cadillac": {
+      logo: "cadillac.png",
+      color: "#D6D6D6",
+      shortName: "C"
+    }
+  };
+
   const rows = teams.map((team, index) => {
     const position = Number.isFinite(team.position)
       ? team.position
       : index + 1;
 
+    const teamName = String(team.name || "Unknown team");
+    const normalizedName = teamName.trim().toLowerCase();
+
+    const asset = teamAssets[normalizedName] || null;
+    const teamColor = asset?.color || "#777777";
+
+    // Logo with fallback initials if image cannot load.
+    const logoMarkup = asset
+      ? `
+        <div class="constructor-logo-wrap">
+
+          <img
+            class="constructor-logo"
+            src="./assets/teams/${asset.logo}"
+            alt="${escapeHTML(teamName)} logo"
+            loading="lazy"
+            decoding="async"
+            onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+          >
+
+          <span
+            class="constructor-logo-fallback"
+            hidden
+            aria-hidden="true"
+          >${asset.shortName}</span>
+
+        </div>
+      `
+      : `
+        <div class="constructor-logo-wrap">
+          <span
+            class="constructor-logo-fallback"
+            aria-hidden="true"
+          >
+            ${escapeHTML(teamName.slice(0, 2).toUpperCase())}
+          </span>
+        </div>
+      `;
+
     return `
-      <tr>
-        <td class="pos">${position}</td>
-        <td><div class="name">${escapeHTML(team.name)}</div></td>
-        <td class="points">${formatPoints(team.points)}</td>
-      </tr>
+      <div
+        class="constructor-row"
+        style="--team-color: ${teamColor}"
+      >
+
+        <div class="constructor-position">
+          ${position}
+        </div>
+
+        <span
+          class="constructor-team-mark"
+          aria-hidden="true"
+        ></span>
+
+        ${logoMarkup}
+
+        <div class="constructor-info">
+
+          <div class="constructor-name">
+            ${escapeHTML(teamName)}
+          </div>
+
+        </div>
+
+        <div class="constructor-points">
+          ${formatPoints(team.points)}
+          <span class="constructor-points-label">PTS</span>
+        </div>
+
+      </div>
     `;
   }).join("");
 
   setHTML(
     "teams",
     `
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>POS</th>
-              <th>CONSTRUCTOR</th>
-              <th class="points">PTS</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
+      <div class="constructor-list">
+
+        <div class="constructor-list-head">
+          <span>Constructor standings</span>
+          <span>Points</span>
+        </div>
+
+        ${rows}
+
       </div>
     `
   );
@@ -390,7 +565,7 @@ function showError(error) {
 // ------------------------------------------
 
 export async function loadChampionship() {
-  // Chặn các lần tải chồng nhau trong cùng module.
+  // Prevent overlapping requests.
   if (isLoading) return;
 
   isLoading = true;
@@ -447,8 +622,7 @@ export async function loadChampionship() {
         "F1"} — ${latestRace.session_name || "Race"}`
     );
 
-    // Gọi song song để giảm thời gian chờ.
-    // api.js sẽ gộp các request trùng URL nếu còn request đang chạy.
+    // Run requests in parallel.
     const results = await Promise.allSettled([
       getDriverChampionship(sessionKey),
       getConstructorChampionship(sessionKey),
@@ -531,8 +705,10 @@ export async function loadChampionship() {
         `Season ${year} · ${formattedDate} · Updated ${new Date().toLocaleTimeString("vi-VN")}`
       );
     }
+
   } catch (error) {
     showError(error);
+
   } finally {
     isLoading = false;
     setLoading(false);
@@ -543,7 +719,7 @@ export async function loadChampionship() {
 // Compatibility
 // ------------------------------------------
 
-// Giữ tương thích nếu index.html vẫn sử dụng onclick="loadData()".
+// Keep compatibility with onclick="loadData()" in index.html.
 if (typeof window !== "undefined") {
   window.loadData = loadChampionship;
 }

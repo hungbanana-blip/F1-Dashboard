@@ -378,21 +378,10 @@ function filterRelevantMeetings(meetings) {
         now <= raceEnd.getTime()
       ) {
         status = "live";
-      } else if (
-        raceEnd &&
-        now > raceEnd.getTime()
-      ) {
+      } else if (raceEnd && now > raceEnd.getTime()) {
         status = "completed";
-      } else if (
-        raceStart &&
-        now < raceStart.getTime()
-      ) {
+      } else if (raceStart && now < raceStart.getTime()) {
         status = "upcoming";
-      } else if (
-        raceEnd &&
-        now > raceEnd.getTime()
-      ) {
-        status = "completed";
       }
 
       return {
@@ -405,21 +394,17 @@ function filterRelevantMeetings(meetings) {
     })
     .filter(Boolean);
 
-  const completed = classified
-    .filter((meeting) => meeting.raceStatus === "completed")
+  // Meeting đang diễn ra: sắp xếp theo thời gian Race.
+  const live = classified
+    .filter((meeting) => meeting.raceStatus === "live")
     .sort((a, b) => {
-      const timeA = a.raceEnd?.getTime() ?? 0;
-      const timeB = b.raceEnd?.getTime() ?? 0;
+      const timeA = a.raceStart?.getTime() ?? Infinity;
+      const timeB = b.raceStart?.getTime() ?? Infinity;
 
-      return timeB - timeA;
+      return timeA - timeB;
     });
 
-  const latestCompleted = completed[0] || null;
-
-  const live = classified.filter(
-    (meeting) => meeting.raceStatus === "live"
-  );
-
+  // Meeting sắp diễn ra: Race gần nhất đứng trước.
   const upcoming = classified
     .filter((meeting) => {
       return (
@@ -434,35 +419,20 @@ function filterRelevantMeetings(meetings) {
       return timeA - timeB;
     });
 
-  const result = [];
-
-  // Chặng đã hoàn thành gần nhất.
-  if (latestCompleted) {
-    result.push({
-      ...latestCompleted,
-      displayStatus: "last-race"
-    });
-  }
-
-  // Nếu đang có race diễn ra, hiển thị LIVE.
-  for (const meeting of live) {
-    result.push({
+  // LIVE luôn đứng trước; các meeting completed không được render.
+  const result = [
+    ...live.map((meeting) => ({
       ...meeting,
       displayStatus: "live"
-    });
-  }
-
-  // Các chặng sắp diễn ra.
-  for (const meeting of upcoming) {
-    result.push({
+    })),
+    ...upcoming.map((meeting) => ({
       ...meeting,
       displayStatus: "upcoming"
-    });
-  }
+    }))
+  ];
 
   return {
     meetings: result,
-    latestCompleted,
     live,
     upcoming
   };
@@ -508,10 +478,10 @@ function renderSession(session) {
 
 function getMeetingBadge(displayStatus) {
   switch (displayStatus) {
-    case "last-race":
+    case "next-race":
       return {
-        label: "LAST RACE",
-        className: "last-race"
+        label: "NEXT RACE",
+        className: "next-race"
       };
 
     case "live":
@@ -616,7 +586,7 @@ export function renderSchedule() {
   if (!filtered.meetings.length) {
     setHTML(
       "scheduleList",
-      '<div class="panel"><div class="empty">No upcoming or recent race sessions available.</div></div>'
+      '<div class="panel"><div class="empty">No upcoming race sessions available.</div></div>'
     );
 
     setText(
@@ -627,24 +597,50 @@ export function renderSchedule() {
     return;
   }
 
+  // LIVE meetings đứng đầu. Nếu không có LIVE, upcoming đầu tiên là NEXT RACE.
+  const nextRaceKey = filtered.live.length
+    ? null
+    : filtered.upcoming[0]?.key;
+
+  const rendered = filtered.meetings
+    .map((meeting) => {
+      if (meeting.raceStatus === "live") {
+        return renderMeeting({
+          ...meeting,
+          displayStatus: "live"
+        });
+      }
+
+      if (meeting.key === nextRaceKey) {
+        return renderMeeting({
+          ...meeting,
+          displayStatus: "next-race"
+        });
+      }
+
+      return renderMeeting({
+        ...meeting,
+        displayStatus: "upcoming"
+      });
+    })
+    .join("");
+
   setHTML(
     "scheduleList",
-    filtered.meetings.map(renderMeeting).join("")
+    rendered
   );
-
-  const completedText = filtered.latestCompleted
-    ? "1 latest race"
-    : "No completed race";
 
   const liveText = filtered.live.length
     ? ` · ${filtered.live.length} live`
     : "";
 
-  const upcomingText = ` · ${filtered.upcoming.length} upcoming`;
+  const upcomingText = filtered.upcoming.length
+    ? ` · ${filtered.upcoming.length} upcoming`
+    : "";
 
   setText(
     "scheduleStatus",
-    `${loadedYear} season · ${completedText}${liveText}${upcomingText}`
+    `${loadedYear} season${liveText}${upcomingText}`
   );
 
   setText(
