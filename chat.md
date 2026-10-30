@@ -2,119 +2,110 @@
 
 Trước khi thực hiện, đọc và tuân thủ `AGENT_WORKFLOW.md`.
 
-Chỉ được chỉnh sửa:
-- `js/schedule.js`
-- `css/schedule.css` nếu thực sự cần thiết.
+Bước 1. Sửa hàm getDriverName()
+Mở js/championship.js, nhấn Ctrl + F, tìm:
+function getDriverName(driver) {
 
-Không sửa API, Championship, Race Results hoặc module khác.
 
-## PHASE 1 – INSPECT
+Thay toàn bộ hàm cũ bằng:
 
-1. Đọc toàn bộ `js/schedule.js` đúng một lần.
-2. Đọc toàn bộ `css/schedule.css` đúng một lần.
-3. Xác định các hàm liên quan:
-   - Lấy dữ liệu race sessions.
-   - Phân loại meeting: completed, live, upcoming.
-   - Lọc meeting.
-   - Sắp xếp meeting.
-   - Render schedule card.
-4. Xác định chính xác đoạn code đang đưa Last Race lên đầu.
-5. Kiểm tra cách xác định ngày giờ và timezone hiện tại.
+function getDriverName(driver) {
+  const first = driver?.first_name || "";
+  const last = driver?.last_name || "";
 
-Không sửa code trong giai đoạn này.
+  return (
+    driver?.full_name ||
+    `${first} ${last}`.trim() ||
+    driver?.name_acronym ||
+    ""
+  ).trim();
+}
 
-## PHASE 2 – PLAN
 
-Trước khi sửa, xác định cụ thể:
 
-1. Hàm nào cần thay đổi.
-2. Có cần tạo hoặc xóa hàm không.
-3. CSS selector nào cần thay đổi.
-4. Những logic nào phải giữ nguyên.
+Tại sao sửa?
 
-Không viết lại toàn bộ module nếu chỉ cần sửa một số hàm.
+Code cũ tự tạo tên "Driver" ngay cả khi không có thông tin tay đua. Code mới trả về chuỗi rỗng nếu không có danh tính.
+Bước 2. Sửa hàm normalizeDriverStandings()
+Nhấn Ctrl + F, tìm:
+function normalizeDriverStandings(records, drivers) {
 
-## PHASE 3 – IMPLEMENT
 
-Thực hiện theo thứ tự:
+Chọn toàn bộ hàm từ dòng khai báo đến dấu } cuối cùng, rồi thay bằng đoạn sau:
 
-**A. Loại bỏ Last Race**
-- Không render meeting có trạng thái completed.
-- Xóa phần hiển thị Last Race khỏi danh sách.
-- Không ảnh hưởng dữ liệu API.
+function normalizeDriverStandings(records, drivers) {
+  if (!Array.isArray(records)) {
+    throw new Error("Invalid driver championship response.");
+  }
 
-**B. Xác định Next Race**
-- Lấy meeting gần nhất chưa kết thúc.
-- Nếu có race đang diễn ra, giữ meeting đó ở đầu danh sách.
-- Nếu không có race đang diễn ra, chọn upcoming meeting có thời gian bắt đầu gần nhất.
-- Chỉ meeting đầu tiên được gắn badge NEXT RACE.
+  const driverLookup = buildDriverLookup(drivers);
 
-**C. Sắp xếp**
-- Sắp xếp các meeting còn lại theo thời gian tăng dần.
-- Không đảo thứ tự session bên trong từng meeting.
-- Không hiển thị meeting đã kết thúc.
+  return records
+    .map((record) => {
+      const number = Number(record.driver_number);
+      const driver = driverLookup.get(number) || {};
 
-**D. Giữ nguyên nội dung**
-Mỗi meeting phải giữ đầy đủ các session có trong dữ liệu:
-- Practice 1
-- Practice 2
-- Practice 3
-- Qualifying
-- Race
+      // Ưu tiên thông tin từ Drivers API.
+      const driverName = getDriverName(driver);
 
-Không tự tạo session nếu API không trả về dữ liệu.
+      // Nếu không tìm thấy, lấy thông tin từ Championship API.
+      const recordName = [
+        record.full_name,
+        record.driver_name,
+        record.name_acronym
+      ]
+        .map((value) => String(value || "").trim())
+        .find((value) =>
+          value &&
+          !["driver", "unknown driver", "unknown"].includes(
+            value.toLowerCase()
+          )
+        ) || "";
 
-**E. CSS**
-- Giữ nguyên thiết kế card hiện tại.
-- Chỉ đổi badge LAST RACE thành NEXT RACE nếu cần.
-- Không thiết kế lại toàn bộ Schedule.
+      const name = driverName || recordName;
 
-## PHASE 4 – VALIDATE
+      const points = Number(
+        record.points_current ??
+        record.points ??
+        record.points_total
+      );
 
-Sau khi sửa, kiểm tra lần lượt:
+      const rawPosition =
+        record.position_current ?? record.position;
 
-1. Không còn card LAST RACE.
-2. Race gần nhất chưa kết thúc đứng đầu.
-3. Nếu có race đang diễn ra, race đó được ưu tiên.
-4. Meeting tiếp theo đứng thứ hai.
-5. Các meeting được sắp xếp theo thời gian tăng dần.
-6. Không có meeting đã kết thúc.
-7. Các session của từng meeting không bị mất.
-8. Ngày giờ và timezone giống logic trước khi sửa.
-9. Không có lỗi JavaScript syntax.
-10. Không có lỗi CSS hoặc selector bị trùng do thay đổi.
+      const position =
+        rawPosition === undefined || rawPosition === null
+          ? NaN
+          : Number(rawPosition);
 
-Nếu không thể xác minh một điều kiện bằng dữ liệu hiện có, phải ghi rõ, không được tự kết luận PASS.
+      return {
+        position,
+        number,
+        name,
+        team:
+          record.team_name ||
+          record.team ||
+          driver.team_name ||
+          "Unknown team",
+        points,
+        acronym:
+          driver.name_acronym ||
+          record.name_acronym ||
+          ""
+      };
+    })
+    // Không hiển thị record không có tên tay đua hợp lệ.
+    .filter((item) =>
+      item.name &&
+      Number.isFinite(item.points)
+    )
+    .sort((a, b) => {
+      const positionDiff = a.position - b.position;
 
-## PHASE 5 – FINAL REPORT
+      if (Number.isFinite(positionDiff) && positionDiff !== 0) {
+        return positionDiff;
+      }
 
-Chỉ báo cáo sau khi hoàn thành:
-
-| Hạng mục | Kết quả |
-|---|---|
-| Last Race removed | PASS/FAIL |
-| Nearest Race first | PASS/FAIL |
-| Live Race priority | PASS/FAIL |
-| Upcoming sorted | PASS/FAIL |
-| Completed races hidden | PASS/FAIL |
-| Sessions preserved | PASS/FAIL |
-| Timezone preserved | PASS/FAIL |
-| JavaScript syntax | PASS/FAIL |
-
-Báo cáo thêm:
-- File đã sửa.
-- Hàm đã thay đổi.
-- CSS selector đã thay đổi.
-- Lỗi còn tồn tại (nếu có).
-
-## STRICT EXECUTION RULES
-
-- Mỗi file chỉ đọc một lần trước khi sửa.
-- Không gọi lại cùng một tool với cùng tham số.
-- Không sửa cùng một đoạn code nhiều lần nếu chưa phát hiện lỗi.
-- Tối đa 2 lần thử lại cho mỗi thao tác thất bại.
-- Không tự mở rộng phạm vi.
-- Không tuyên bố hoàn thành nếu chưa kiểm tra.
-- Nếu gặp blocker, dừng và báo nguyên nhân thay vì tiếp tục lặp.
-
-Thực hiện tuần tự cả 5 giai đoạn trong cùng nhiệm vụ. Không dừng sau khi lập kế hoạch, trừ khi phát hiện blocker cần người dùng quyết định.
+      return b.points - a.points;
+    });
+}

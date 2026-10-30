@@ -66,16 +66,15 @@ function formatPoints(value) {
 }
 
 function getDriverName(driver) {
-  const first = driver.first_name || "";
-  const last = driver.last_name || "";
+  const first = driver?.first_name || "";
+  const last = driver?.last_name || "";
 
   return (
-    driver.full_name ||
+    driver?.full_name ||
     `${first} ${last}`.trim() ||
-    driver.name_acronym ||
-    `Driver ${driver.driver_number ?? ""}`.trim() ||
-    "Unknown driver"
-  );
+    driver?.name_acronym ||
+    ""
+  ).trim();
 }
 
 function getTeamName(item) {
@@ -164,7 +163,24 @@ function normalizeDriverStandings(records, drivers) {
       const number = Number(record.driver_number);
       const driver = driverLookup.get(number) || {};
 
+      // Ưu tiên thông tin từ Drivers API.
       const driverName = getDriverName(driver);
+
+      // Nếu không tìm thấy, lấy thông tin từ Championship API.
+      const recordName = [
+        record.full_name,
+        record.driver_name,
+        record.name_acronym
+      ]
+        .map((value) => String(value || "").trim())
+        .find((value) =>
+          value &&
+          !["driver", "unknown driver", "unknown"].includes(
+            value.toLowerCase()
+          )
+        ) || "";
+
+      const name = driverName || recordName;
 
       const points = Number(
         record.points_current ??
@@ -183,13 +199,7 @@ function normalizeDriverStandings(records, drivers) {
       return {
         position,
         number,
-        name:
-          driverName !== "Unknown driver"
-            ? driverName
-            : record.full_name ||
-              record.driver_name ||
-              record.name_acronym ||
-              `Driver ${record.driver_number ?? ""}`,
+        name,
         team:
           record.team_name ||
           record.team ||
@@ -202,7 +212,11 @@ function normalizeDriverStandings(records, drivers) {
           ""
       };
     })
-    .filter((item) => Number.isFinite(item.points))
+    // Không hiển thị record không có tên tay đua hợp lệ.
+    .filter((item) =>
+      item.name &&
+      Number.isFinite(item.points)
+    )
     .sort((a, b) => {
       const positionDiff = a.position - b.position;
 
