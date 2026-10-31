@@ -1,230 +1,39 @@
 
 /* ============================================
    APEX F1 — RACE RESULTS
+   F1 RACING DARK THEME
    File: css/race-results.css
    ============================================ */
 
 /* --------------------------------------------
-   Results table container
+   1. THEME VARIABLES
    -------------------------------------------- */
 
-.results-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: 10px;
-  scrollbar-width: thin;
-  -webkit-overflow-scrolling: touch;
-}
+#race-results-page {
+  --rr-bg: #101318;
+  --rr-surface: #171C24;
+  --rr-surface-alt: #1E2530;
+  --rr-surface-hover: #252E3B;
 
-.results-table {
-  width: 100%;
-  min-width: 850px;
-  border-collapse: collapse;
-  border-spacing: 0;
-  font-size: 0.9rem;
-  text-align: left;
+  --rr-border: #303947;
+  --rr-border-soft: rgba(255, 255, 255, 0.07);
+
+  --rr-text: #F2F4F8;
+  --rr-muted: #9AA5B4;
+
+  --rr-red: #E10600;
+  --rr-red-hover: #FF1E18;
+
+  --rr-green: #35D39A;
+  --rr-orange: #FFB454;
+  --rr-yellow: #F5C542;
+
+  color: var(--rr-text);
+  color-scheme: dark;
 }
 
 /* --------------------------------------------
-   Table header
-   -------------------------------------------- */
-
-.results-table thead {
-  background: var(--surface-alt, #20232b);
-}
-
-.results-table thead th {
-  padding: 14px 12px;
-  color: var(--text-muted, #a0a5b1);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  border-bottom: 1px solid var(--border-color, #343843);
-}
-
-/* --------------------------------------------
-   Table body
-   -------------------------------------------- */
-
-.results-table tbody tr {
-  border-bottom: 1px solid var(--border-color, #2b2f38);
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.results-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.results-table tbody tr:hover {
-  background: var(--surface-hover, rgba(255, 255, 255, 0.045));
-}
-
-.results-table tbody td {
-  padding: 13px 12px;
-  color: var(--text-color, #e8eaf0);
-  vertical-align: middle;
-  white-space: nowrap;
-}
-
-/* --------------------------------------------
-   Position
-   -------------------------------------------- */
-
-.result-position {
-  width: 60px;
-  font-size: 1rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
-.results-table tbody tr:first-child .result-position {
-  color: #f5c542;
-}
-
-.results-table tbody tr:nth-child(2) .result-position {
-  color: #c5ccd6;
-}
-
-.results-table tbody tr:nth-child(3) .result-position {
-  color: #cd8b55;
-}
-
-/* --------------------------------------------
-   Driver number
-   -------------------------------------------- */
-
-.result-driver-number {
-  width: 55px;
-  color: var(--text-muted, #a0a5b1) !important;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* --------------------------------------------
-   Driver
-   -------------------------------------------- */
-
-.result-driver {
-  min-width: 190px;
-}
-
-.result-driver-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.result-driver-info strong {
-  font-size: 0.9rem;
-  font-weight: 700;
-}
-
-.result-driver-info small {
-  color: var(--text-muted, #a0a5b1);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.result-team-color {
-  display: inline-block;
-  width: 4px;
-  min-width: 4px;
-  height: 30px;
-  margin-right: 9px;
-  border-radius: 3px;
-  vertical-align: middle;
-}
-
-/* --------------------------------------------
-   Team
-   -------------------------------------------- */
-
-.result-team {
-  min-width: 145px;
-  color: var(--text-muted, #a0a5b1) !important;
-  font-size: 0.82rem;
-}
-
-/* --------------------------------------------
-   Time and gap
-   -------------------------------------------- */
-
-.result-time,
-.result-gap,
-.result-laps {
-  font-variant-numeric: tabular-nums;
-}
-
-.result-time {
-  font-weight: 600;
-}
-
-.result-gap {
-  color: var(--text-muted, #a0a5b1) !important;
-  font-size: 0.82rem;
-}
-
-.result-laps {
-  text-align: center;
-}
-
-/* --------------------------------------------
-   Status badges
-   -------------------------------------------- */
-
-.result-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 70px;
-  padding: 5px 9px;
-  border: 1px solid transparent;
-  border-radius: 5px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* Finished */
-
-.result-finished {
-  color: #39d98a;
-  background: rgba(57, 217, 138, 0.1);
-  border-color: rgba(57, 217, 138, 0.25);
-}
-
-/* Did Not Finish */
-
-.result-dnf {
-  color: #ff8b70;
-  background: rgba(255, 107, 107, 0.12);
-  border-color: rgba(255, 107, 107, 0.3);
-}
-
-/* Did Not Start */
-
-.result-dns {
-  color: #ffbd69;
-  background: rgba(255, 189, 105, 0.12);
-  border-color: rgba(255, 189, 105, 0.3);
-}
-
-/* Disqualified */
-
-.result-dsq {
-  color: #ff6b81;
-  background: rgba(255, 59, 92, 0.13);
-  border-color: rgba(255, 59, 92, 0.35);
-}
-
-/* --------------------------------------------
-   Race results page controls
+   2. PAGE CONTROLS
    -------------------------------------------- */
 
 #race-results-page .schedule-controls {
@@ -232,87 +41,606 @@
   flex-wrap: wrap;
   align-items: end;
   gap: 14px;
+
+  padding: 16px;
+  margin-bottom: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1B202A 0%,
+      #141820 100%
+    );
+
+  border: 1px solid var(--rr-border);
+  border-radius: 12px;
 }
 
 #race-results-page .schedule-controls label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  gap: 7px;
+
+  color: var(--rr-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 #race-results-page .schedule-controls select {
   min-width: 160px;
   max-width: 100%;
+  min-height: 40px;
+
+  padding: 9px 34px 9px 12px;
+
+  color: var(--rr-text);
+  background-color: var(--rr-surface-alt);
+
+  border: 1px solid var(--rr-border);
+  border-radius: 7px;
+
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#race-results-page .schedule-controls select:hover {
+  border-color: #657286;
+  background-color: #252D39;
+}
+
+#race-results-page .schedule-controls select:focus-visible {
+  outline: none;
+  border-color: var(--rr-red);
+
+  box-shadow:
+    0 0 0 3px rgba(225, 6, 0, 0.2);
 }
 
 #race-results-page #resultsSession {
   min-width: 240px;
 }
 
+/* --------------------------------------------
+   3. REFRESH BUTTON
+   -------------------------------------------- */
+
 #race-results-page #resultsRefresh {
+  min-height: 40px;
+
+  padding: 9px 17px;
+
+  color: #FFFFFF;
+  background: var(--rr-red);
+
+  border: 1px solid var(--rr-red);
+  border-radius: 7px;
+
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+
   white-space: nowrap;
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 10px rgba(225, 6, 0, 0.18);
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+#race-results-page #resultsRefresh:hover:not(:disabled) {
+  background: var(--rr-red-hover);
+  border-color: var(--rr-red-hover);
+
+  box-shadow:
+    0 5px 16px rgba(225, 6, 0, 0.28);
+
+  transform: translateY(-1px);
+}
+
+#race-results-page #resultsRefresh:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#race-results-page #resultsRefresh:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  box-shadow: none;
 }
 
 /* --------------------------------------------
-   Empty and loading states
+   4. RESULTS STATUS
    -------------------------------------------- */
 
-#race-results-page .empty {
-  padding: 28px 16px;
-  color: var(--text-muted, #a0a5b1);
-  text-align: center;
-}
-
 #race-results-page #resultsStatus {
-  margin-top: 10px;
-  font-size: 0.84rem;
-  line-height: 1.5;
+  margin: 10px 2px 16px;
+
+  color: var(--rr-muted);
+
+  font-size: 0.82rem;
+  line-height: 1.6;
 }
 
 #race-results-page #resultsStatus[data-state="error"] {
-  color: #ff8b70;
+  padding: 10px 13px;
+
+  color: #FF8B83;
+  background: rgba(225, 6, 0, 0.09);
+
+  border: 1px solid rgba(225, 6, 0, 0.25);
+  border-radius: 7px;
+}
+
+#race-results-page #resultsStatus[data-state="info"] {
+  color: var(--rr-muted);
 }
 
 /* --------------------------------------------
-   Responsive
+   5. RESULTS TABLE CONTAINER
+   -------------------------------------------- */
+
+#race-results-page #raceResults {
+  width: 100%;
+  min-width: 0;
+}
+
+#race-results-page .results-table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  background: var(--rr-surface);
+
+  border: 1px solid var(--rr-border);
+  border-radius: 12px;
+
+  scrollbar-width: thin;
+  scrollbar-color: #515D6E #171C24;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+#race-results-page .results-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+#race-results-page .results-table-wrapper::-webkit-scrollbar-track {
+  background: #171C24;
+}
+
+#race-results-page .results-table-wrapper::-webkit-scrollbar-thumb {
+  background: #515D6E;
+  border-radius: 10px;
+}
+
+#race-results-page .results-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #78879B;
+}
+
+/* --------------------------------------------
+   6. TABLE
+   -------------------------------------------- */
+
+#race-results-page .results-table {
+  width: 100%;
+  min-width: 850px;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  color: var(--rr-text);
+
+  font-size: 0.86rem;
+  text-align: left;
+}
+
+/* --------------------------------------------
+   7. TABLE HEADER
+   -------------------------------------------- */
+
+#race-results-page .results-table thead {
+  background: #202733;
+}
+
+#race-results-page .results-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  padding: 14px 13px;
+
+  color: #AEB8C7;
+
+  font-size: 0.69rem;
+  font-weight: 800;
+
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+
+  border-bottom: 1px solid #394454;
+}
+
+#race-results-page .results-table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+#race-results-page .results-table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+/* --------------------------------------------
+   8. TABLE BODY
+   -------------------------------------------- */
+
+#race-results-page .results-table tbody tr {
+  background: #171C24;
+
+  border-bottom: 1px solid var(--rr-border-soft);
+
+  transition:
+    background-color 0.16s ease;
+}
+
+#race-results-page .results-table tbody tr:nth-child(even) {
+  background: #1A202A;
+}
+
+#race-results-page .results-table tbody tr:hover {
+  background: #252E3B;
+}
+
+#race-results-page .results-table tbody td {
+  padding: 12px 13px;
+
+  color: var(--rr-text);
+
+  vertical-align: middle;
+  white-space: nowrap;
+
+  border-bottom: 1px solid var(--rr-border-soft);
+}
+
+#race-results-page .results-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* --------------------------------------------
+   9. POSITION
+   -------------------------------------------- */
+
+#race-results-page .result-position {
+  width: 60px;
+
+  color: #F1F3F7;
+
+  font-size: 1rem;
+  font-weight: 900;
+
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* Không dùng nth-child để tô P1/P2/P3.
+   API có thể trả DNF trước các vị trí hợp lệ. */
+
+/* --------------------------------------------
+   10. DRIVER NUMBER
+   -------------------------------------------- */
+
+#race-results-page .result-driver-number {
+  width: 55px;
+
+  color: #AEB8C7 !important;
+
+  font-size: 0.88rem;
+  font-weight: 800;
+
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* --------------------------------------------
+   11. DRIVER
+   -------------------------------------------- */
+
+#race-results-page .result-driver {
+  min-width: 200px;
+}
+
+#race-results-page .result-driver-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#race-results-page .result-driver-info strong {
+  color: #F5F6FA;
+
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+#race-results-page .result-driver-info small {
+  color: #8F9BAD;
+
+  font-size: 0.69rem;
+  font-weight: 800;
+
+  letter-spacing: 0.05em;
+}
+
+#race-results-page .result-team-color {
+  display: inline-block;
+
+  width: 4px;
+  min-width: 4px;
+  height: 31px;
+
+  margin-right: 9px;
+
+  background: #777777;
+
+  border-radius: 4px;
+
+  vertical-align: middle;
+
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 0.06);
+}
+
+/* --------------------------------------------
+   12. TEAM
+   -------------------------------------------- */
+
+#race-results-page .result-team {
+  min-width: 145px;
+
+  color: #B3BDCA !important;
+
+  font-size: 0.81rem;
+  font-weight: 600;
+}
+
+/* --------------------------------------------
+   13. TIME / GAP / LAPS
+   -------------------------------------------- */
+
+#race-results-page .result-time,
+#race-results-page .result-gap,
+#race-results-page .result-laps {
+  font-variant-numeric: tabular-nums;
+}
+
+#race-results-page .result-time {
+  color: #F5F6FA !important;
+
+  font-family:
+    "Consolas",
+    "SFMono-Regular",
+    monospace;
+
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+#race-results-page .result-gap {
+  color: #AEB8C7 !important;
+
+  font-family:
+    "Consolas",
+    "SFMono-Regular",
+    monospace;
+
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+#race-results-page .result-laps {
+  min-width: 55px;
+
+  color: #D5DAE3 !important;
+
+  font-size: 0.82rem;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+/* --------------------------------------------
+   14. STATUS BADGES
+   -------------------------------------------- */
+
+#race-results-page .result-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 76px;
+
+  padding: 5px 10px;
+
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  font-size: 0.66rem;
+  font-weight: 900;
+
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+/* FINISHED */
+
+#race-results-page .result-finished {
+  color: #43D9A0;
+
+  background: rgba(53, 211, 154, 0.09);
+
+  border-color: rgba(53, 211, 154, 0.23);
+}
+
+/* DNF */
+
+#race-results-page .result-dnf {
+  color: #FF8B83;
+
+  background: rgba(225, 6, 0, 0.11);
+
+  border-color: rgba(225, 6, 0, 0.28);
+}
+
+/* DNS */
+
+#race-results-page .result-dns {
+  color: #FFBE70;
+
+  background: rgba(255, 180, 84, 0.1);
+
+  border-color: rgba(255, 180, 84, 0.27);
+}
+
+/* DSQ */
+
+#race-results-page .result-dsq {
+  color: #FF6B81;
+
+  background: rgba(255, 59, 92, 0.12);
+
+  border-color: rgba(255, 59, 92, 0.3);
+}
+
+/* --------------------------------------------
+   15. EMPTY / LOADING STATES
+   -------------------------------------------- */
+
+#race-results-page .empty {
+  padding: 36px 18px;
+
+  color: var(--rr-muted);
+
+  background: var(--rr-surface);
+
+  border: 1px solid var(--rr-border);
+  border-radius: 12px;
+
+  font-size: 0.88rem;
+  line-height: 1.6;
+
+  text-align: center;
+}
+
+/* --------------------------------------------
+   16. ACCESSIBILITY
+   -------------------------------------------- */
+
+#race-results-page button:focus-visible,
+#race-results-page select:focus-visible {
+  outline: 2px solid var(--rr-red);
+  outline-offset: 3px;
+}
+
+/* --------------------------------------------
+   17. TABLET
    -------------------------------------------- */
 
 @media (max-width: 768px) {
-  .results-table {
-    min-width: 760px;
-    font-size: 0.82rem;
-  }
-
-  .results-table thead th {
-    padding: 11px 9px;
-    font-size: 0.66rem;
-  }
-
-  .results-table tbody td {
-    padding: 11px 9px;
-  }
-
   #race-results-page .schedule-controls {
     align-items: stretch;
     flex-direction: column;
+    gap: 12px;
+
+    padding: 13px;
   }
 
-  #race-results-page .schedule-controls label,
+  #race-results-page .schedule-controls label {
+    width: 100%;
+  }
+
   #race-results-page .schedule-controls select,
+  #race-results-page #resultsSession,
   #race-results-page #resultsRefresh {
     width: 100%;
     min-width: 0;
   }
+
+  #race-results-page .results-table {
+    min-width: 820px;
+    font-size: 0.81rem;
+  }
+
+  #race-results-page .results-table thead th {
+    padding: 12px 10px;
+    font-size: 0.64rem;
+  }
+
+  #race-results-page .results-table tbody td {
+    padding: 11px 10px;
+  }
+
+  #race-results-page .result-driver {
+    min-width: 185px;
+  }
+
+  #race-results-page .result-driver-info strong {
+    font-size: 0.82rem;
+  }
+
+  #race-results-page .result-team {
+    min-width: 130px;
+    font-size: 0.76rem;
+  }
 }
 
 /* --------------------------------------------
-   Reduced motion
+   18. SMALL MOBILE
+   -------------------------------------------- */
+
+@media (max-width: 480px) {
+  #race-results-page .schedule-controls {
+    border-radius: 9px;
+  }
+
+  #race-results-page .results-table-wrapper {
+    border-radius: 9px;
+  }
+
+  #race-results-page .results-table {
+    min-width: 790px;
+  }
+
+  #race-results-page #resultsStatus {
+    font-size: 0.76rem;
+  }
+}
+
+/* --------------------------------------------
+   19. REDUCED MOTION
    -------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .results-table tbody tr {
-    transition: none;
+  #race-results-page *,
+  #race-results-page *::before,
+  #race-results-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
