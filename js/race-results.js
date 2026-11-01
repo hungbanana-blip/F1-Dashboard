@@ -14,12 +14,14 @@
  *   raceResults
  */
 
+import * as apiModule from "./api.js";
 import {
   getSessions,
   getDrivers,
   getSessionResult
 } from "./api.js";
 
+import * as configModule from "./config.js";
 import {
   DEFAULT_SEASON,
   MIN_SEASON,
@@ -43,6 +45,7 @@ const resultsContainer = document.getElementById("raceResults");
 let currentSessions = [];
 let requestVersion = 0;
 let initialized = false;
+const stintsCache = new Map();
 
 // ============================================================
 // HELPERS
@@ -252,7 +255,7 @@ function renderCountryFlag(session) {
 
   const onError = flag.fallback
     ? `onerror="if(this.dataset.fallbackTried!=='1'){this.dataset.fallbackTried='1';this.src='${fallbackURL}';}else{this.onerror=null;this.parentElement.classList.add('race-identity-flag-empty');this.remove();}"`
-    : `onerror="this.onerror=null;this.parentElement.classList.add('race-identity-flag-empty');this.remove();"` ;
+    : `onerror="this.onerror=null;this.parentElement.classList.add('race-identity-flag-empty');this.remove();"`;
 
   return `
     <div class="race-identity-flag">
@@ -349,7 +352,13 @@ function renderRaceIdentity(session, driverCount) {
       </div>
     </section>
   `;
-}function formatSeconds(value) {
+}
+
+// ============================================================
+// FORMATTING & STATUS HELPERS
+// ============================================================
+
+function formatSeconds(value) {
   if (value === null || value === undefined || value === "") {
     return "—";
   }
@@ -469,6 +478,322 @@ function getStatusClass(status) {
     default:
       return "";
   }
+}
+
+// ============================================================
+// TYRE STINTS — FETCH, PARSE & RENDER
+// ============================================================
+
+function getOpenF1BaseURL() {
+  const rawBase =
+    configModule.API_BASE_URL ||
+    configModule.OPENF1_BASE_URL ||
+    configModule.BASE_URL ||
+    "https://api.openf1.org/v1";
+
+  return String(rawBase).replace(/\/+$/, "");
+}
+
+async function fetchSessionStints(sessionKey, forceRefresh = false) {
+  if (!Number.isInteger(sessionKey) || sessionKey <= 0) {
+    return [];
+  }
+
+  if (!forceRefresh && stintsCache.has(sessionKey)) {
+    return stintsCache.get(sessionKey);
+  }
+
+  let stints = [];
+
+  if (typeof apiModule.getStints === "function") {
+    stints = await apiModule.getStints(sessionKey);
+  } else if (typeof apiModule.getSessionStints === "function") {
+    stints = await apiModule.getSessionStints(sessionKey);
+  } else {
+    const endpoint = `${getOpenF1BaseURL()}/stints?session_key=${encodeURIComponent(sessionKey)}`;
+    const response = await fetch(endpoint, {
+      headers: { Accept: "application/json" }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Không thể tải dữ liệu lốp (HTTP ${response.status}).`);
+    }
+
+    stints = await response.json();
+  }
+
+  const normalized = Array.isArray(stints) ? stints : [];
+  stintsCache.set(sessionKey, normalized);
+
+  return normalized;
+}
+
+function getTyreCompoundMeta(rawCompound) {
+  const compound = String(rawCompound || "")
+    .trim()
+    .toUpperCase();
+
+  switch (compound) {
+    case "SOFT":
+    case "S":
+    case "SUPERSOFT":
+    case "ULTRASOFT":
+    case "HYPERSOFT":
+      return {
+        code: "S",
+        name: "Soft",
+        className: "tyre-soft"
+      };
+
+    case "MEDIUM":
+    case "M":
+      return {
+        code: "M",
+        name: "Medium",
+        className: "tyre-medium"
+      };
+
+    case "HARD":
+    case "H":
+      return {
+        code: "H",
+        name: "Hard",
+        className: "tyre-hard"
+      };
+
+    case "INTERMEDIATE":
+    case "INTER":
+    case "I":
+      return {
+        code: "I",
+        name: "Intermediate",
+        className: "tyre-inter"
+      };
+
+    case "WET":
+    case "FULL_WET":
+    case "EXTREME_WET":
+    case "W":
+      return {
+        code: "W",
+        name: "Wet",
+        className: "tyre-wet"
+      };
+
+    default:
+      return {
+        code: "?",
+        name: compound && compound !== "UNKNOWN" && compound !== "TEST_UNKNOWN"
+          ? compound
+          : "Unknown",
+        className: "tyre-unknown"
+      };
+  }
+}
+
+function calculateStintLapCount(stint, nextStint, totalDriverLaps) {
+  const explicitLaps = Number(stint?.laps ?? stint?.lap_count);
+  if (Number.isFinite(explicitLaps) && explicitLaps >= 0) {
+    return Math.round(explicitLaps);
+  }
+
+  if (Number.isFinite(totalDriverLaps) && totalDriverLaps === 0) {
+    return 0;
+  }
+
+  const lapStart = Number(stint?.lap_start);
+  let lapEnd = Number(stint?.lap_end);
+
+  if (
+    (!Number.isFinite(lapEnd) || lapEnd <= 0) &&
+    Number.isFinite(totalDriverLaps) &&
+    totalDriverLaps >= lapStart
+  ) {
+    lapEnd = totalDriverLaps;
+  }
+
+  if (
+    !Number.isFinite(lapStart) ||
+    !Number.isFinite(lapEnd) ||
+    lapStart <= 0 ||
+    lapEnd < lapStart
+  ) {
+    return null;
+  }
+
+  const nextStart = Number(nextStint?.lap_start);
+
+  // Nếu stint kế tiếp có lap_start trùng với lap_end của stint hiện tại,
+  // số vòng thực chạy của stint hiện tại là (lapEnd - lapStart).
+  if (
+    Number.isFinite(nextStart) &&
+    nextStart === lapEnd &&
+    lapEnd > lapStart
+  ) {
+    return lapEnd - lapStart;
+  }
+
+  return lapEnd - lapStart + 1;
+}
+
+function buildDriverStintsMap(rawStints) {
+  const grouped = new Map();
+
+  if (!Array.isArray(rawStints) || rawStints.length === 0) {
+    return grouped;
+  }
+
+  rawStints.forEach((stint) => {
+    const driverNumber = Number(stint?.driver_number);
+    if (!Number.isInteger(driverNumber) || driverNumber <= 0) return;
+
+    if (!grouped.has(driverNumber)) {
+      grouped.set(driverNumber, []);
+    }
+
+    grouped.get(driverNumber).push(stint);
+  });
+
+  grouped.forEach((driverStints, driverNumber) => {
+    const sorted = [...driverStints].sort((a, b) => {
+      const stintA = Number(a?.stint_number) || 0;
+      const stintB = Number(b?.stint_number) || 0;
+
+      if (stintA !== stintB) return stintA - stintB;
+
+      const lapA = Number(a?.lap_start) || 0;
+      const lapB = Number(b?.lap_start) || 0;
+      return lapA - lapB;
+    });
+
+    // Khử trùng lặp theo stint_number nếu telemetry trả nhiều bản ghi cho cùng 1 stint
+    const deduped = [];
+    const seenStintNumbers = new Map();
+
+    sorted.forEach((stint) => {
+      const stintNum = Number(stint?.stint_number);
+      if (Number.isInteger(stintNum) && stintNum > 0) {
+        if (seenStintNumbers.has(stintNum)) {
+          const existingIndex = seenStintNumbers.get(stintNum);
+          const existingEnd = Number(deduped[existingIndex]?.lap_end) || 0;
+          const currentEnd = Number(stint?.lap_end) || 0;
+          if (currentEnd >= existingEnd) {
+            deduped[existingIndex] = stint;
+          }
+          return;
+        }
+        seenStintNumbers.set(stintNum, deduped.length);
+      }
+      deduped.push(stint);
+    });
+
+    grouped.set(driverNumber, deduped);
+  });
+
+  return grouped;
+}
+
+function renderDriverTyres(driverStints, rawTotalLaps) {
+  if (!Array.isArray(driverStints) || driverStints.length === 0) {
+    return `<span class="result-tyres-empty">—</span>`;
+  }
+
+  const totalDriverLaps = Number(rawTotalLaps);
+  const validTotalLaps = Number.isFinite(totalDriverLaps) && totalDriverLaps >= 0
+    ? totalDriverLaps
+    : null;
+
+  const stintBadges = driverStints.map((stint, index) => {
+    const nextStint = driverStints[index + 1] || null;
+    const compoundMeta = getTyreCompoundMeta(stint?.compound);
+    const laps = calculateStintLapCount(stint, nextStint, validTotalLaps);
+
+    const stintNumber = Number(stint?.stint_number) || index + 1;
+    const lapStart = Number(stint?.lap_start);
+    const lapEnd = Number(stint?.lap_end);
+    const tyreAge = Number(stint?.tyre_age_at_start);
+
+    const lapRangeText =
+      Number.isFinite(lapStart) && Number.isFinite(lapEnd) && lapEnd >= lapStart
+        ? `Lap ${lapStart}–${lapEnd}`
+        : Number.isFinite(lapStart) && lapStart > 0
+          ? `From Lap ${lapStart}`
+          : "";
+
+    const tyreAgeText =
+      Number.isFinite(tyreAge) && tyreAge > 0
+        ? `Used tyre (${tyreAge}L old at start)`
+        : "Fresh tyre";
+
+    const lapsText =
+      laps !== null
+        ? `${laps} ${laps === 1 ? "lap" : "laps"}`
+        : "Laps N/A";
+
+    const tooltip = [
+      `Stint ${stintNumber}: ${compoundMeta.name} (${compoundMeta.code})`,
+      lapsText,
+      lapRangeText,
+      tyreAgeText
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    const badgeHTML = `
+      <span
+        class="result-tyre-stint"
+        title="${escapeHTML(tooltip)}"
+        aria-label="${escapeHTML(tooltip)}"
+      >
+        <span
+          class="result-tyre-icon ${compoundMeta.className}"
+          aria-hidden="true"
+        >${escapeHTML(compoundMeta.code)}</span>
+        <span class="result-tyre-laps">
+          ${laps !== null ? `${escapeHTML(laps)}<small>L</small>` : "—"}
+        </span>
+      </span>
+    `;
+
+    if (index < driverStints.length - 1) {
+      return `${badgeHTML}<span class="result-tyre-arrow" aria-hidden="true">›</span>`;
+    }
+
+    return badgeHTML;
+  });
+
+  return `
+    <div class="result-tyres-list" role="list" aria-label="Tyre stints">
+      ${stintBadges.join("")}
+    </div>
+  `;
+}
+
+function renderTyreLegend() {
+  return `
+    <div class="tyre-legend" aria-label="Tyre compound legend">
+      <span class="tyre-legend-item">
+        <span class="result-tyre-icon tyre-soft" aria-hidden="true">S</span>
+        Soft
+      </span>
+      <span class="tyre-legend-item">
+        <span class="result-tyre-icon tyre-medium" aria-hidden="true">M</span>
+        Medium
+      </span>
+      <span class="tyre-legend-item">
+        <span class="result-tyre-icon tyre-hard" aria-hidden="true">H</span>
+        Hard
+      </span>
+      <span class="tyre-legend-item">
+        <span class="result-tyre-icon tyre-inter" aria-hidden="true">I</span>
+        Inter
+      </span>
+      <span class="tyre-legend-item">
+        <span class="result-tyre-icon tyre-wet" aria-hidden="true">W</span>
+        Wet
+      </span>
+    </div>
+  `;
 }
 
 // ============================================================
@@ -773,11 +1098,13 @@ function renderRaceSummary(sortedResults, driverMap) {
       </div>
     </section>
   `;
-}// ============================================================
+}
+
+// ============================================================
 // RENDER RESULTS
 // ============================================================
 
-function renderResults(results, drivers, session) {
+function renderResults(results, drivers, session, stints = []) {
   if (!resultsContainer) return;
 
   if (!Array.isArray(results) || results.length === 0) {
@@ -792,6 +1119,8 @@ function renderResults(results, drivers, session) {
     ])
   );
 
+  const stintsByDriver = buildDriverStintsMap(stints);
+
   const sortedResults = [...results].sort((a, b) => {
     const positionA = getValidPosition(a);
     const positionB = getValidPosition(b);
@@ -804,7 +1133,8 @@ function renderResults(results, drivers, session) {
   });
 
   const rows = sortedResults.map((result) => {
-    const driver = driverMap.get(Number(result.driver_number));
+    const driverNumber = Number(result.driver_number);
+    const driver = driverMap.get(driverNumber);
     const name = getDriverName(driver);
     const code = getDriverCode(driver);
     const team = driver?.team_name || "—";
@@ -818,6 +1148,9 @@ function renderResults(results, drivers, session) {
 
     const duration = formatDuration(result.duration);
     const gap = formatGap(result.gap_to_leader, Number(position));
+
+    const driverStints = stintsByDriver.get(driverNumber) || [];
+    const tyresHTML = renderDriverTyres(driverStints, result.number_of_laps);
 
     return `
       <tr>
@@ -846,6 +1179,8 @@ function renderResults(results, drivers, session) {
 
         <td class="result-gap">${escapeHTML(gap)}</td>
 
+        <td class="result-tyres">${tyresHTML}</td>
+
         <td class="result-laps">${escapeHTML(laps)}</td>
 
         <td>
@@ -864,7 +1199,10 @@ function renderResults(results, drivers, session) {
 
     <div class="panel-head results-classification-header">
       <h2>Final Classification</h2>
-      <span class="tag">RACE RESULTS</span>
+      <div class="results-classification-meta">
+        ${renderTyreLegend()}
+        <span class="tag">RACE RESULTS</span>
+      </div>
     </div>
 
     <div class="results-table-wrapper">
@@ -877,6 +1215,7 @@ function renderResults(results, drivers, session) {
             <th scope="col">Team</th>
             <th scope="col">Time</th>
             <th scope="col">Gap</th>
+            <th scope="col">Tyres</th>
             <th scope="col">Laps</th>
             <th scope="col">Status</th>
           </tr>
@@ -894,7 +1233,7 @@ function renderResults(results, drivers, session) {
 // LOAD ONE SESSION RESULT
 // ============================================================
 
-async function loadResults() {
+async function loadResults(forceRefresh = false) {
   const sessionKey = Number(sessionSelect?.value);
   const version = ++requestVersion;
 
@@ -910,7 +1249,7 @@ async function loadResults() {
 
   setLoading(true);
   showEmpty("Loading race results...");
-  setStatus("Đang tải kết quả và thông tin tay đua...");
+  setStatus("Đang tải kết quả, thông tin tay đua và chiến thuật lốp...");
 
   try {
     const results = await getSessionResult(sessionKey);
@@ -923,18 +1262,34 @@ async function loadResults() {
       return;
     }
 
-    let drivers = [];
+    const [driversOutcome, stintsOutcome] = await Promise.allSettled([
+      getDrivers(sessionKey),
+      fetchSessionStints(sessionKey, forceRefresh)
+    ]);
 
-    try {
-      drivers = await getDrivers(sessionKey);
-    } catch (error) {
-      // Vẫn hiển thị vị trí và số xe nếu thông tin tay đua lỗi.
-      console.warn("Không tải được thông tin tay đua:", error);
+    let drivers = [];
+    if (driversOutcome.status === "fulfilled") {
+      drivers = driversOutcome.value;
+    } else {
+      console.warn(
+        "Không tải được thông tin tay đua:",
+        driversOutcome.reason
+      );
+    }
+
+    let stints = [];
+    if (stintsOutcome.status === "fulfilled") {
+      stints = stintsOutcome.value;
+    } else {
+      console.warn(
+        "Không tải được dữ liệu chiến thuật lốp:",
+        stintsOutcome.reason
+      );
     }
 
     if (version !== requestVersion) return;
 
-    renderResults(results, drivers, session);
+    renderResults(results, drivers, session, stints);
 
     const label = session ? getSessionLabel(session) : "Grand Prix";
 
@@ -980,11 +1335,11 @@ export async function initRaceResults() {
 
   yearSelect.addEventListener("change", loadSessions);
 
-  sessionSelect.addEventListener("change", loadResults);
+  sessionSelect.addEventListener("change", () => loadResults(false));
 
   refreshButton.addEventListener("click", () => {
     if (sessionSelect.value) {
-      loadResults();
+      loadResults(true);
     } else {
       loadSessions();
     }

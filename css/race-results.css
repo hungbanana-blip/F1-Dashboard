@@ -1,4 +1,3 @@
-
 /* ============================================
    APEX F1 — RACE RESULTS
    F1 RACING DARK THEME
@@ -238,7 +237,7 @@
 
 #race-results-page .results-table {
   width: 100%;
-  min-width: 850px;
+  min-width: 960px;
 
   border-collapse: separate;
   border-spacing: 0;
@@ -581,7 +580,7 @@
   }
 
   #race-results-page .results-table {
-    min-width: 820px;
+    min-width: 920px;
     font-size: 0.81rem;
   }
 
@@ -622,7 +621,7 @@
   }
 
   #race-results-page .results-table {
-    min-width: 790px;
+    min-width: 890px;
   }
 
   #race-results-page #resultsStatus {
@@ -922,6 +921,7 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
 /* ============================================================
    21. RACE IDENTITY
    Race event information: flag, Grand Prix, circuit, location
@@ -1022,7 +1022,9 @@
   font-size: 0.76rem;
   font-weight: 500;
   line-height: 1.4;
-}/* ------------------------------------------------------------
+}
+
+/* ------------------------------------------------------------
    RACE IDENTITY — EVENT METADATA
    ------------------------------------------------------------ */
 
@@ -1112,7 +1114,9 @@
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-}/* ============================================================
+}
+
+/* ============================================================
    22. RACE IDENTITY — RESPONSIVE
    ============================================================ */
 
@@ -1214,7 +1218,6 @@
   }
 }
 
-
 /* ------------------------------------------------------------
    RACE IDENTITY — REAL COUNTRY FLAG IMAGE
    ------------------------------------------------------------ */
@@ -1242,4 +1245,211 @@
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.08em;
+}
+
+/* ============================================================
+   23. TYRE STINTS — COMPOUND ICON & LAPS PER STINT
+   ============================================================ */
+
+#race-results-page .results-classification-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+#race-results-page .tyre-legend {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  background: var(--rr-surface);
+  border: 1px solid var(--rr-border-soft);
+  border-radius: 999px;
+}
+
+#race-results-page .tyre-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--rr-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+#race-results-page .result-tyres {
+  min-width: 155px;
+}
+
+#race-results-page .result-tyres-list {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 5px;
+}
+
+#race-results-page .result-tyre-stint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 4px;
+  background: #12161F;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  cursor: default;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+#race-results-page .result-tyre-stint:hover {
+  background: #1B2230;
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Pirelli-style circular F1 tyre compound badge */
+#race-results-page .result-tyre-icon {
+  --tyre-color: #8F9BAD;
+  --tyre-text: #D5DAE3;
+  --tyre-glow: transparent;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+
+  color: var(--tyre-text);
+  background: radial-gradient(circle at 35% 30%, #232A36 0%, #0D1016 75%);
+  border: 2.2px solid var(--tyre-color);
+  border-radius: 50%;
+
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+
+  box-shadow:
+    inset 0 0 0 1.2px rgba(0, 0, 0, 0.7),
+    0 0 7px var(--tyre-glow);
+}
+
+#race-results-page .tyre-legend .result-tyre-icon {
+  flex-basis: 17px;
+  width: 17px;
+  height: 17px;
+  border-width: 2px;
+  font-size: 0.58rem;
+}
+
+/* Compound color tokens */
+#race-results-page .result-tyre-icon.tyre-soft {
+  --tyre-color: #FF2D26;
+  --tyre-text: #FF554F;
+  --tyre-glow: rgba(255, 45, 38, 0.24);
+}
+
+#race-results-page .result-tyre-icon.tyre-medium {
+  --tyre-color: #F5C542;
+  --tyre-text: #FFD65A;
+  --tyre-glow: rgba(245, 197, 66, 0.22);
+}
+
+#race-results-page .result-tyre-icon.tyre-hard {
+  --tyre-color: #F2F4F8;
+  --tyre-text: #FFFFFF;
+  --tyre-glow: rgba(242, 244, 248, 0.18);
+}
+
+#race-results-page .result-tyre-icon.tyre-inter {
+  --tyre-color: #35D39A;
+  --tyre-text: #4CE6B0;
+  --tyre-glow: rgba(53, 211, 154, 0.22);
+}
+
+#race-results-page .result-tyre-icon.tyre-wet {
+  --tyre-color: #2E9BFF;
+  --tyre-text: #62B5FF;
+  --tyre-glow: rgba(46, 155, 255, 0.24);
+}
+
+#race-results-page .result-tyre-icon.tyre-unknown {
+  --tyre-color: #78879B;
+  --tyre-text: #AEB8C7;
+  --tyre-glow: transparent;
+}
+
+#race-results-page .result-tyre-laps {
+  color: #E5E9F0;
+  font-family:
+    "Consolas",
+    "SFMono-Regular",
+    monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+#race-results-page .result-tyre-laps small {
+  margin-left: 1px;
+  color: #8F9BAD;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+#race-results-page .result-tyre-arrow {
+  color: #5C687A;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  user-select: none;
+}
+
+#race-results-page .result-tyres-empty {
+  color: var(--rr-muted);
+  font-family:
+    "Consolas",
+    "SFMono-Regular",
+    monospace;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 768px) {
+  #race-results-page .tyre-legend {
+    gap: 8px;
+    padding: 4px 8px;
+  }
+
+  #race-results-page .tyre-legend-item {
+    font-size: 0.62rem;
+  }
+
+  #race-results-page .result-tyres {
+    min-width: 140px;
+  }
+
+  #race-results-page .result-tyre-stint {
+    gap: 5px;
+    padding: 2px 7px 2px 3px;
+  }
+
+  #race-results-page .result-tyre-icon {
+    flex-basis: 18px;
+    width: 18px;
+    height: 18px;
+    font-size: 0.6rem;
+  }
+
+  #race-results-page .result-tyre-laps {
+    font-size: 0.72rem;
+  }
 }
