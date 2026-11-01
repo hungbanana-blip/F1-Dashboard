@@ -193,7 +193,6 @@ function initializeTimezoneSelector() {
     select.appendChild(option);
   }
 
-  // Chỉ thiết lập mặc định khi chưa có giá trị hợp lệ.
   const hasCurrentValue = Array.from(select.options).some(
     (option) => option.value === select.value
   );
@@ -201,6 +200,121 @@ function initializeTimezoneSelector() {
   if (!hasCurrentValue) {
     select.value = DEFAULT_TIMEZONE;
   }
+}
+
+// ------------------------------------------
+// Country flags
+// ------------------------------------------
+
+// OpenF1 uses 3-letter country codes.
+// Convert them to ISO 2-letter codes for fallback flags.
+
+const COUNTRY_CODE_MAP = {
+  AUS: "au",
+  BRN: "bh",
+  CHN: "cn",
+  JPN: "jp",
+  KSA: "sa",
+  USA: "us",
+  CAN: "ca",
+  MON: "mc",
+  ESP: "es",
+  AUT: "at",
+  GBR: "gb",
+  BEL: "be",
+  HUN: "hu",
+  NED: "nl",
+  ITA: "it",
+  AZE: "az",
+  SGP: "sg",
+  MEX: "mx",
+  BRA: "br",
+  QAT: "qa",
+  UAE: "ae"
+};
+
+function getCountryISO2(session) {
+  const code = String(session.country_code || "")
+    .trim()
+    .toUpperCase();
+
+  if (COUNTRY_CODE_MAP[code]) {
+    return COUNTRY_CODE_MAP[code];
+  }
+
+  // Accept an ISO 2-letter code if already provided.
+  if (/^[A-Z]{2}$/.test(code)) {
+    return code.toLowerCase();
+  }
+
+  return "";
+}
+
+function getCountryFlagURL(session) {
+  const iso2 = getCountryISO2(session);
+
+  // Prefer the official flag URL returned by OpenF1.
+  const apiFlag = String(session.country_flag || "").trim();
+
+  if (apiFlag) {
+    try {
+      const url = new URL(apiFlag);
+
+      if (url.protocol === "https:") {
+        return {
+          primary: url.href,
+          fallback: iso2
+            ? `https://flagcdn.com/w80/${iso2}.png`
+            : ""
+        };
+      }
+    } catch (error) {
+      console.warn("Invalid country flag URL:", error);
+    }
+  }
+
+  if (iso2) {
+    return {
+      primary: `https://flagcdn.com/${iso2}.svg`,
+      fallback: `https://flagcdn.com/w80/${iso2}.png`
+    };
+  }
+
+  return {
+    primary: "",
+    fallback: ""
+  };
+}
+
+function renderCountryFlag(session) {
+  const flag = getCountryFlagURL(session);
+
+  if (!flag.primary) {
+    return `
+      <div class="race-identity-flag race-identity-flag-empty"
+           aria-label="Country flag unavailable">
+        <span>F1</span>
+      </div>
+    `;
+  }
+
+  const primary = escapeHTML(flag.primary);
+  const fallback = escapeHTML(flag.fallback);
+
+  const fallbackHandler = fallback
+    ? `onerror="this.onerror=null;this.src='${fallback}';"`
+    : `onerror="this.onerror=null;this.style.display='none';"`;
+
+  return `
+    <div class="race-identity-flag">
+      <img
+        src="${primary}"
+        alt="${escapeHTML(session.country_name || "Country")} flag"
+        loading="lazy"
+        ${fallbackHandler}
+      >
+    </div>
+  `;
 }
 
 // ------------------------------------------
@@ -289,6 +403,8 @@ function groupSessions(sessions) {
         name: session.meeting_name || "Grand Prix",
         circuit: session.circuit_short_name || "",
         country: session.country_name || "",
+        countryCode: session.country_code || "",
+        countryFlag: session.country_flag || "",
         location: session.location || "",
         dateStart: session.date_start || null,
         sessions: []
@@ -315,6 +431,14 @@ function groupSessions(sessions) {
 
     if (!meeting.country && session.country_name) {
       meeting.country = session.country_name;
+    }
+
+    if (!meeting.countryCode && session.country_code) {
+      meeting.countryCode = session.country_code;
+    }
+
+    if (!meeting.countryFlag && session.country_flag) {
+      meeting.countryFlag = session.country_flag;
     }
 
     if (!meeting.location && session.location) {
@@ -363,7 +487,7 @@ function filterRelevantMeetings(meetings) {
     .map((meeting) => {
       const raceSession = getRaceSession(meeting);
 
-      // Chỉ lấy Grand Prix có phiên Race.
+      // Only include Grand Prix meetings with a Race session.
       if (!raceSession) return null;
 
       const raceStart = parseDate(raceSession.date_start);
@@ -394,7 +518,7 @@ function filterRelevantMeetings(meetings) {
     })
     .filter(Boolean);
 
-  // Meeting đang diễn ra: sắp xếp theo thời gian Race.
+  // Live meetings first.
   const live = classified
     .filter((meeting) => meeting.raceStatus === "live")
     .sort((a, b) => {
@@ -404,7 +528,7 @@ function filterRelevantMeetings(meetings) {
       return timeA - timeB;
     });
 
-  // Meeting sắp diễn ra: Race gần nhất đứng trước.
+  // Upcoming meetings, nearest Race first.
   const upcoming = classified
     .filter((meeting) => {
       return (
@@ -419,12 +543,13 @@ function filterRelevantMeetings(meetings) {
       return timeA - timeB;
     });
 
-  // LIVE luôn đứng trước; các meeting completed không được render.
+  // Completed meetings are not rendered.
   const result = [
     ...live.map((meeting) => ({
       ...meeting,
       displayStatus: "live"
     })),
+
     ...upcoming.map((meeting) => ({
       ...meeting,
       displayStatus: "upcoming"
@@ -473,7 +598,7 @@ function renderSession(session) {
 }
 
 // ------------------------------------------
-// Render Grand Prix card
+// Meeting badge
 // ------------------------------------------
 
 function getMeetingBadge(displayStatus) {
@@ -498,17 +623,88 @@ function getMeetingBadge(displayStatus) {
   }
 }
 
-function renderMeeting(meeting) {
-  const sessionHTML = meeting.sessions
-    .map(renderSession)
-    .join("");
+// ------------------------------------------
+// Race identity
+// ------------------------------------------
 
-  const locationParts = [
+function getSeasonLabel(meeting) {
+  const year = loadedYear || DEFAULT_SEASON;
+
+  return `${year} SEASON`;
+}
+
+function getMeetingTitle(meeting) {
+  return String(meeting.name || "Grand Prix").trim();
+}
+
+function getMeetingLocation(meeting) {
+  const parts = [
     meeting.location,
     meeting.country
   ].filter(Boolean);
 
-  const locationText = [...new Set(locationParts)].join(", ");
+  return [...new Set(parts)].join(", ");
+}
+
+function renderRaceIdentity(meeting) {
+  const flagSession = {
+    country_name: meeting.country,
+    country_code: meeting.countryCode,
+    country_flag: meeting.countryFlag
+  };
+
+  const flagHTML = renderCountryFlag(flagSession);
+
+  const title = getMeetingTitle(meeting);
+  const country = meeting.country || "";
+  const circuit = meeting.circuit || "";
+  const location = getMeetingLocation(meeting);
+
+  const circuitHTML = circuit
+    ? `<div class="race-identity-circuit">${escapeHTML(circuit)}</div>`
+    : "";
+
+  const locationHTML = location
+    ? `<div class="race-identity-location">${escapeHTML(location)}</div>`
+    : "";
+
+  return `
+    <section class="race-identity">
+
+      ${flagHTML}
+
+      <div class="race-identity-content">
+
+        <div class="race-identity-season">
+          ${escapeHTML(getSeasonLabel(meeting))}
+        </div>
+
+        <h2 class="race-identity-title">
+          ${escapeHTML(title)}
+        </h2>
+
+        ${country
+          ? `<div class="race-identity-country">${escapeHTML(country)}</div>`
+          : ""
+        }
+
+        ${circuitHTML}
+        ${locationHTML}
+
+      </div>
+
+    </section>
+  `;
+}
+
+// ------------------------------------------
+// Render Grand Prix card
+// ------------------------------------------
+
+function renderMeeting(meeting) {
+  const sessionHTML = meeting.sessions
+    .map(renderSession)
+    .join("");
 
   const dateText = meeting.raceSession?.date_start
     ? formatDate(meeting.raceSession.date_start)
@@ -516,20 +712,15 @@ function renderMeeting(meeting) {
       ? formatDate(meeting.dateStart)
       : "Date TBC";
 
-  const circuitHTML = meeting.circuit
-    ? `<span class="race-circuit">${escapeHTML(meeting.circuit)}</span>`
-    : "";
-
-  const locationHTML = locationText
-    ? `<span class="race-location">${escapeHTML(locationText)}</span>`
-    : "";
-
   const badge = getMeetingBadge(meeting.displayStatus);
+
+  const identityHTML = renderRaceIdentity(meeting);
 
   return `
     <article class="race-card race-card-${badge.className}">
 
       <div class="race-card-head">
+
         <div class="race-number race-label-${badge.className}">
           ${badge.label}
         </div>
@@ -537,24 +728,19 @@ function renderMeeting(meeting) {
         <div class="race-date">
           ${escapeHTML(dateText)}
         </div>
+
       </div>
 
       <div class="race-card-body">
 
-        <h2 class="race-title">
-          ${escapeHTML(meeting.name)}
-        </h2>
-
-        <div class="race-meta">
-          ${circuitHTML}
-          ${locationHTML}
-        </div>
+        ${identityHTML}
 
         <div class="race-sessions">
           ${sessionHTML || '<div class="empty">No sessions available.</div>'}
         </div>
 
       </div>
+
     </article>
   `;
 }
@@ -594,10 +780,16 @@ export function renderSchedule() {
       `All session times shown in ${getTimezoneLabel(timezone)}.`
     );
 
+    setText(
+      "scheduleStatus",
+      `${loadedYear} season · No upcoming races`
+    );
+
     return;
   }
 
-  // LIVE meetings đứng đầu. Nếu không có LIVE, upcoming đầu tiên là NEXT RACE.
+  // LIVE meetings stand first.
+  // If there is no LIVE meeting, the nearest upcoming Race is NEXT RACE.
   const nextRaceKey = filtered.live.length
     ? null
     : filtered.upcoming[0]?.key;

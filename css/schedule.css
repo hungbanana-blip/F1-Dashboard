@@ -1,12 +1,12 @@
 
-/* =========================================
+/* ==========================================
    APEX F1 — SCHEDULE
    File: css/schedule.css
-   ========================================= */
+   ========================================== */
 
-/* =========================================
+/* ==========================================
    1. Schedule page
-   ========================================= */
+   ========================================== */
 
 #schedule-page {
   width: 100%;
@@ -24,9 +24,9 @@
   line-height: 1.6;
 }
 
-/* =========================================
+/* ==========================================
    2. Schedule control panel
-   ========================================= */
+   ========================================== */
 
 #schedule-page > .panel {
   margin-bottom: var(--space-5);
@@ -52,9 +52,9 @@
   font-weight: 600;
 }
 
-/* =========================================
+/* ==========================================
    3. Select fields
-   ========================================= */
+   ========================================== */
 
 #schedule-page .schedule-controls select {
   min-width: 170px;
@@ -87,9 +87,9 @@
   outline-offset: 2px;
 }
 
-/* =========================================
+/* ==========================================
    4. Refresh schedule button
-   ========================================= */
+   ========================================== */
 
 #schedule-page #scheduleRefresh {
   display: inline-flex;
@@ -124,9 +124,9 @@
   cursor: wait;
 }
 
-/* =========================================
+/* ==========================================
    5. Schedule status
-   ========================================= */
+   ========================================== */
 
 #schedule-page .schedule-info {
   padding: 0 var(--space-5) var(--space-4);
@@ -145,9 +145,9 @@
   line-height: 1.6;
 }
 
-/* =========================================
+/* ==========================================
    6. Race list
-   ========================================= */
+   ========================================== */
 
 #schedule-page .schedule-list {
   display: grid;
@@ -158,9 +158,9 @@
   min-width: 0;
 }
 
-/* =========================================
+/* ==========================================
    7. Race card
-   ========================================= */
+   ========================================== */
 
 #schedule-page .race-card {
   min-width: 0;
@@ -199,9 +199,9 @@
   border-left: 3px solid var(--line-strong);
 }
 
-/* =========================================
+/* ==========================================
    8. Race card header
-   ========================================= */
+   ========================================== */
 
 #schedule-page .race-card-head {
   display: flex;
@@ -267,59 +267,146 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* =========================================
+/* ==========================================
    9. Race card body
-   ========================================= */
+   ========================================== */
 
 #schedule-page .race-card-body {
   min-width: 0;
 }
 
-#schedule-page .race-title {
-  margin: 0;
-  padding: var(--space-4) var(--space-5) var(--space-1);
+/* ==========================================
+   10. Race identity
+   Shared visual structure with Race Results
+   ========================================== */
+
+#schedule-page .race-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-width: 0;
+  margin: 12px 13px 0;
+  padding: 14px;
+
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+/* Country flag container */
+
+#schedule-page .race-identity-flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+
+  background: var(--panel-hover);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+/* Country flag image */
+
+#schedule-page .race-identity-flag img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* Flag unavailable fallback */
+
+#schedule-page .race-identity-flag-empty {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+/* Identity text area */
+
+#schedule-page .race-identity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Season label */
+
+#schedule-page .race-identity-season {
+  margin-bottom: 4px;
+
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.8px;
+}
+
+/* Grand Prix title */
+
+#schedule-page .race-identity-title {
+  margin: 0 0 4px;
+  padding: 0;
 
   color: var(--text);
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 1.4;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
 
   overflow-wrap: anywhere;
 }
 
-#schedule-page .race-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+/* Country */
 
-  padding: 0 var(--space-5) var(--space-3);
+#schedule-page .race-identity-country {
+  margin-bottom: 2px;
 
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Circuit */
+
+#schedule-page .race-identity-circuit {
   color: var(--muted);
-  font-size: var(--text-xs);
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1.5;
 }
 
-#schedule-page .race-circuit {
-  font-weight: 600;
-}
+/* Location */
 
-#schedule-page .race-location {
+#schedule-page .race-identity-location {
   color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 
-/* =========================================
-   10. Session list
-   ========================================= */
+/* ==========================================
+   11. Session list
+   ========================================== */
 
 #schedule-page .race-sessions {
   width: 100%;
   min-width: 0;
+  margin-top: 12px;
 }
 
-/* =========================================
-   11. Session rows
-   ========================================= */
+/* ==========================================
+   12. Session rows
+   ========================================== */
 
 #schedule-page .session-row {
   display: grid;
@@ -345,9 +432,9 @@
   border-bottom: 0;
 }
 
-/* =========================================
-   12. Session name
-   ========================================= */
+/* ==========================================
+   13. Session name
+   ========================================== */
 
 #schedule-page .session-name {
   display: flex;
@@ -366,9 +453,9 @@
   overflow-wrap: anywhere;
 }
 
-/* =========================================
-   13. Session status indicator
-   ========================================= */
+/* ==========================================
+   14. Session status indicator
+   ========================================== */
 
 #schedule-page .session-status {
   display: inline-block;
@@ -406,9 +493,9 @@
   background: var(--muted);
 }
 
-/* =========================================
-   14. Session times
-   ========================================= */
+/* ==========================================
+   15. Session times
+   ========================================== */
 
 #schedule-page .session-time {
   min-width: 0;
@@ -423,9 +510,9 @@
   overflow-wrap: anywhere;
 }
 
-/* =========================================
-   15. Empty and error states
-   ========================================= */
+/* ==========================================
+   16. Empty and error states
+   ========================================== */
 
 #schedule-page .empty {
   padding: var(--space-6) var(--space-5);
@@ -447,9 +534,9 @@
   overflow-wrap: anywhere;
 }
 
-/* =========================================
-   16. Tablet
-   ========================================= */
+/* ==========================================
+   17. Tablet
+   ========================================== */
 
 @media (max-width: 900px) {
   #schedule-page .schedule-controls {
@@ -478,9 +565,9 @@
   }
 }
 
-/* =========================================
-   17. Mobile
-   ========================================= */
+/* ==========================================
+   18. Mobile
+   ========================================== */
 
 @media (max-width: 600px) {
   #schedule-page .schedule-controls {
@@ -509,18 +596,42 @@
     padding: var(--space-4);
   }
 
-  #schedule-page .race-title {
-    padding: var(--space-4) var(--space-4) var(--space-1);
-    font-size: 16px;
+  /* Race identity */
+
+  #schedule-page .race-identity {
+    gap: 11px;
+    margin: 10px 10px 0;
+    padding: 11px;
   }
 
-  #schedule-page .race-meta {
-    padding: 0 var(--space-4) var(--space-3);
+  #schedule-page .race-identity-flag {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  #schedule-page .race-identity-title {
+    font-size: 15px;
+  }
+
+  #schedule-page .race-identity-season {
+    font-size: 10px;
+  }
+
+  #schedule-page .race-identity-country {
+    font-size: 12px;
+  }
+
+  #schedule-page .race-identity-circuit,
+  #schedule-page .race-identity-location {
+    font-size: 11px;
   }
 
   #schedule-page .race-date {
     font-size: 12px;
   }
+
+  /* Session rows */
 
   #schedule-page .session-row {
     grid-template-columns: minmax(0, 1fr);
@@ -539,9 +650,9 @@
   }
 }
 
-/* =========================================
-   18. Very small screens
-   ========================================= */
+/* ==========================================
+   19. Very small screens
+   ========================================== */
 
 @media (max-width: 360px) {
   #schedule-page .race-card-head {
@@ -557,14 +668,30 @@
     font-size: 10px;
   }
 
+  #schedule-page .race-identity {
+    align-items: flex-start;
+    gap: 9px;
+    padding: 10px;
+  }
+
+  #schedule-page .race-identity-flag {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  #schedule-page .race-identity-title {
+    font-size: 14px;
+  }
+
   #schedule-page .session-time {
     font-size: 13px;
   }
 }
 
-/* =========================================
-   19. Reduced motion
-   ========================================= */
+/* ==========================================
+   20. Reduced motion
+   ========================================== */
 
 @media (prefers-reduced-motion: reduce) {
   #schedule-page .race-card,

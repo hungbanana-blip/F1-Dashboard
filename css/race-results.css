@@ -1213,3 +1213,33 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* ------------------------------------------------------------
+   RACE IDENTITY — REAL COUNTRY FLAG IMAGE
+   ------------------------------------------------------------ */
+
+#race-results-page .race-identity-flag {
+  overflow: hidden;
+  padding: 0;
+}
+
+#race-results-page .race-identity-flag img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+}
+
+#race-results-page .race-identity-flag-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #AEB8C7;
+  background: var(--rr-surface-alt);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}

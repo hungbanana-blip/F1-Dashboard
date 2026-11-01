@@ -204,13 +204,62 @@ function getCountryCode(session) {
   return countryCodes[country] || "";
 }
 
-function getCountryFlag(session) {
-  const code = getCountryCode(session);
-  if (!code) return "🏁";
+function getCountryFlagURL(session) {
+  const countryCode = getCountryCode(session);
+  const rawFlagURL = String(session?.country_flag || "").trim();
 
-  return [...code]
-    .map((letter) => String.fromCodePoint(127397 + letter.charCodeAt(0)))
-    .join("");
+  // Ưu tiên URL cờ do OpenF1 cung cấp, chỉ chấp nhận HTTPS.
+  if (rawFlagURL) {
+    try {
+      const parsedURL = new URL(rawFlagURL);
+      if (parsedURL.protocol === "https:") {
+        return {
+          primary: parsedURL.href,
+          fallback: countryCode
+            ? `https://flagcdn.com/${countryCode.toLowerCase()}.svg`
+            : ""
+        };
+      }
+    } catch (error) {
+      console.warn("Race Results: URL country_flag không hợp lệ.", error);
+    }
+  }
+
+  if (!countryCode) return { primary: "", fallback: "" };
+
+  const iso2 = countryCode.toLowerCase();
+  return {
+    primary: `https://flagcdn.com/${iso2}.svg`,
+    fallback: `https://flagcdn.com/w80/${iso2}.png`
+  };
+}
+
+function renderCountryFlag(session) {
+  const flag = getCountryFlagURL(session);
+
+  if (!flag.primary) {
+    return `
+      <div class="race-identity-flag race-identity-flag-empty"
+           role="img" aria-label="Country flag unavailable">
+        <span>F1</span>
+      </div>
+    `;
+  }
+
+  const primaryURL = escapeHTML(flag.primary);
+  const fallbackURL = escapeHTML(flag.fallback);
+  const countryName = escapeHTML(session?.country_name || "Country");
+
+  const onError = flag.fallback
+    ? `onerror="if(this.dataset.fallbackTried!=='1'){this.dataset.fallbackTried='1';this.src='${fallbackURL}';}else{this.onerror=null;this.parentElement.classList.add('race-identity-flag-empty');this.remove();}"`
+    : `onerror="this.onerror=null;this.parentElement.classList.add('race-identity-flag-empty');this.remove();"` ;
+
+  return `
+    <div class="race-identity-flag">
+      <img src="${primaryURL}" alt="${countryName} flag"
+           loading="lazy" decoding="async" ${onError}>
+    </div>
+  `;
 }
 
 function getGrandPrixName(session) {
@@ -258,9 +307,7 @@ function renderRaceIdentity(session, driverCount) {
   return `
     <section class="race-identity" aria-label="Race event information">
       <div class="race-identity-main">
-        <div class="race-identity-flag" aria-hidden="true">
-          ${getCountryFlag(session)}
-        </div>
+        ${renderCountryFlag(session)}
 
         <div class="race-identity-copy">
           <div class="race-identity-eyebrow">
