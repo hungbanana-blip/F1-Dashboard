@@ -1,4 +1,3 @@
-
 /**
  * APEX F1 — Race Results
  * File: js/race-results.js
@@ -126,7 +125,184 @@ function getSessionDate(session) {
   });
 }
 
-function formatSeconds(value) {
+// ============================================================
+// RACE IDENTITY
+// ============================================================
+
+function getCountryCode(session) {
+  const rawCode = String(
+    session?.country_code || session?.country_iso_code || ""
+  ).trim().toUpperCase();
+
+  const threeLetterCodes = {
+    USA: "US",
+    GBR: "GB",
+    ITA: "IT",
+    MCO: "MC",
+    ESP: "ES",
+    CAN: "CA",
+    MEX: "MX",
+    BRA: "BR",
+    AUS: "AU",
+    JPN: "JP",
+    CHN: "CN",
+    SGP: "SG",
+    BHR: "BH",
+    SAU: "SA",
+    ARE: "AE",
+    QAT: "QA",
+    NLD: "NL",
+    BEL: "BE",
+    AUT: "AT",
+    HUN: "HU",
+    AZE: "AZ",
+    PRT: "PT",
+    FRA: "FR",
+    DEU: "DE",
+    CHE: "CH"
+  };
+
+  if (/^[A-Z]{2}$/.test(rawCode)) return rawCode;
+  if (threeLetterCodes[rawCode]) return threeLetterCodes[rawCode];
+
+  const country = String(session?.country_name || "")
+    .trim()
+    .toLowerCase();
+
+  const countryCodes = {
+    "united states": "US",
+    usa: "US",
+    "united kingdom": "GB",
+    uk: "GB",
+    "great britain": "GB",
+    italy: "IT",
+    monaco: "MC",
+    spain: "ES",
+    canada: "CA",
+    mexico: "MX",
+    brazil: "BR",
+    australia: "AU",
+    japan: "JP",
+    china: "CN",
+    singapore: "SG",
+    bahrain: "BH",
+    "saudi arabia": "SA",
+    "united arab emirates": "AE",
+    uae: "AE",
+    qatar: "QA",
+    netherlands: "NL",
+    belgium: "BE",
+    austria: "AT",
+    hungary: "HU",
+    azerbaijan: "AZ",
+    portugal: "PT",
+    france: "FR",
+    germany: "DE",
+    switzerland: "CH"
+  };
+
+  return countryCodes[country] || "";
+}
+
+function getCountryFlag(session) {
+  const code = getCountryCode(session);
+  if (!code) return "🏁";
+
+  return [...code]
+    .map((letter) => String.fromCodePoint(127397 + letter.charCodeAt(0)))
+    .join("");
+}
+
+function getGrandPrixName(session) {
+  const officialName =
+    session?.meeting_official_name || session?.meeting_name;
+
+  if (officialName) return officialName;
+
+  const country = String(session?.country_name || "").trim();
+  return country ? `${country} Grand Prix` : "Grand Prix";
+}
+
+function getCircuitName(session) {
+  const circuit = String(session?.circuit_short_name || "").trim();
+  const location = String(session?.location || "").trim().toLowerCase();
+  const countryCode = getCountryCode(session);
+
+  // OpenF1 may identify COTA by the city name "Austin".
+  if (countryCode === "US" && location === "austin") {
+    return "Circuit of The Americas (COTA)";
+  }
+
+  return circuit;
+}
+
+function renderRaceIdentity(session, driverCount) {
+  if (!session) return "";
+
+  const country = session.country_name || "";
+  const location = session.location || "";
+  const circuit = getCircuitName(session);
+  const grandPrixName = getGrandPrixName(session);
+  const sessionName = session.session_name || "Race";
+  const date = getSessionDate(session);
+  const season = session.year || yearSelect?.value || "";
+  const roundNumber = Number(session.meeting_number);
+
+  const roundLabel =
+    Number.isInteger(roundNumber) && roundNumber > 0
+      ? `ROUND ${roundNumber}`
+      : "";
+
+  const locationLabel = [location, country].filter(Boolean).join(", ");
+
+  return `
+    <section class="race-identity" aria-label="Race event information">
+      <div class="race-identity-main">
+        <div class="race-identity-flag" aria-hidden="true">
+          ${getCountryFlag(session)}
+        </div>
+
+        <div class="race-identity-copy">
+          <div class="race-identity-eyebrow">
+            ${roundLabel ? `${escapeHTML(roundLabel)} · ` : ""}
+            ${season ? `${escapeHTML(season)} SEASON` : ""}
+          </div>
+
+          <h2 class="race-identity-title">
+            ${escapeHTML(grandPrixName)}
+          </h2>
+
+          ${circuit ? `
+            <div class="race-identity-circuit">
+              ${escapeHTML(circuit)}
+            </div>
+          ` : ""}
+
+          ${locationLabel ? `
+            <div class="race-identity-location">
+              ${escapeHTML(locationLabel)}
+            </div>
+          ` : ""}
+        </div>
+      </div>
+
+      <div class="race-identity-meta">
+        <div>
+          <span>SESSION</span>
+          <strong>${escapeHTML(sessionName)}</strong>
+        </div>
+        <div>
+          <span>DATE</span>
+          <strong>${escapeHTML(date || "—")}</strong>
+        </div>
+        <div>
+          <span>CLASSIFICATION</span>
+          <strong>${driverCount} DRIVERS</strong>
+        </div>
+      </div>
+    </section>
+  `;
+}function formatSeconds(value) {
   if (value === null || value === undefined || value === "") {
     return "—";
   }
@@ -208,6 +384,29 @@ function getResultStatus(result) {
   if (result.dnf === true) return "DNF";
 
   return "Finished";
+}
+
+function getValidPosition(result) {
+  const value = result?.position;
+
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const position = Number(value);
+
+  return Number.isInteger(position) && position > 0
+    ? position
+    : null;
+}
+
+function isClassifiedResult(result) {
+  return (
+    result?.dnf !== true &&
+    result?.dns !== true &&
+    result?.dsq !== true &&
+    getValidPosition(result) !== null
+  );
 }
 
 function getStatusClass(status) {
@@ -385,10 +584,153 @@ async function loadSessions() {
 }
 
 // ============================================================
+// RACE SUMMARY
+// ============================================================
+
+function renderRaceSummary(sortedResults, driverMap) {
+  if (!Array.isArray(sortedResults) || sortedResults.length === 0) {
+    return "";
+  }
+
+  const getDriver = (result) =>
+    driverMap.get(Number(result?.driver_number));
+
+  const winner = sortedResults.find(
+    (result) =>
+      getValidPosition(result) === 1 &&
+      isClassifiedResult(result)
+  );
+
+  const second = sortedResults.find(
+    (result) =>
+      getValidPosition(result) === 2 &&
+      isClassifiedResult(result)
+  );
+
+  const podium = sortedResults.filter((result) => {
+    const position = getValidPosition(result);
+    return (
+      position !== null &&
+      position <= 3 &&
+      isClassifiedResult(result)
+    );
+  });
+
+  const classified = sortedResults.filter(isClassifiedResult);
+
+  const dnfCount = sortedResults.filter(
+    (result) => result?.dnf === true
+  ).length;
+
+  const dnsCount = sortedResults.filter(
+    (result) => result?.dns === true
+  ).length;
+
+  const dsqCount = sortedResults.filter(
+    (result) => result?.dsq === true
+  ).length;
+
+  const maxLaps = Math.max(
+    0,
+    ...sortedResults.map((result) => {
+      const laps = Number(result?.number_of_laps);
+      return Number.isFinite(laps) && laps > 0 ? laps : 0;
+    })
+  );
+
+  const winnerDriver = winner ? getDriver(winner) : null;
+  const winnerName = winner
+    ? getDriverName(winnerDriver)
+    : "Not available";
+  const winnerTeam = winnerDriver?.team_name || "—";
+
+  const winningGap = second
+    ? formatGap(second.gap_to_leader, 2)
+    : "—";
+
+  const podiumHTML = podium.map((result) => {
+    const driver = getDriver(result);
+    const position = getValidPosition(result);
+    const name = getDriverName(driver);
+    const code = getDriverCode(driver);
+    const team = driver?.team_name || "—";
+    const color = getDriverColor(driver);
+
+    return `
+      <div class="race-summary-podium-item">
+        <span class="race-summary-position">P${position}</span>
+        <span
+          class="race-summary-team-color"
+          style="background-color: ${color}"
+          aria-hidden="true"
+        ></span>
+        <span class="race-summary-driver">
+          <strong>${escapeHTML(name)}</strong>
+          <small>${escapeHTML(code)} · ${escapeHTML(team)}</small>
+        </span>
+      </div>
+    `;
+  }).join("");
+
+  const nonFinishers = dnfCount + dnsCount + dsqCount;
+
+  return `
+    <section class="race-summary" aria-label="Race Summary">
+      <div class="race-summary-header">
+        <h3>RACE SUMMARY</h3>
+        <span>${escapeHTML(winnerTeam === "—" ? "RACE" : "RACE RESULTS")}</span>
+      </div>
+
+      <div class="race-summary-grid">
+        <article class="race-summary-card">
+          <span class="race-summary-label">WINNER</span>
+          <strong>${escapeHTML(winnerName)}</strong>
+          <small>${escapeHTML(winnerTeam)}</small>
+        </article>
+
+        <article class="race-summary-card">
+          <span class="race-summary-label">GAP TO P2</span>
+          <strong>${escapeHTML(winningGap)}</strong>
+          <small>Winning margin</small>
+        </article>
+
+        <article class="race-summary-card">
+          <span class="race-summary-label">CLASSIFIED</span>
+          <strong>${classified.length}</strong>
+          <small>Of ${sortedResults.length} drivers</small>
+        </article>
+
+        <article class="race-summary-card">
+          <span class="race-summary-label">NON-FINISHERS</span>
+          <strong>${nonFinishers}</strong>
+          <small>DNF ${dnfCount} · DNS ${dnsCount} · DSQ ${dsqCount}</small>
+        </article>
+      </div>
+
+      ${
+        podium.length > 0
+          ? `
+            <div class="race-summary-podium">
+              <h4>FINAL PODIUM</h4>
+              <div class="race-summary-podium-list">
+                ${podiumHTML}
+              </div>
+            </div>
+          `
+          : ""
+      }
+
+      <div class="race-summary-footer">
+        <span>RACE DISTANCE</span>
+        <strong>${maxLaps > 0 ? `${maxLaps} Laps` : "—"}</strong>
+      </div>
+    </section>
+  `;
+}// ============================================================
 // RENDER RESULTS
 // ============================================================
 
-function renderResults(results, drivers) {
+function renderResults(results, drivers, session) {
   if (!resultsContainer) return;
 
   if (!Array.isArray(results) || results.length === 0) {
@@ -404,11 +746,12 @@ function renderResults(results, drivers) {
   );
 
   const sortedResults = [...results].sort((a, b) => {
-    const positionA = Number(a.position);
-    const positionB = Number(b.position);
+    const positionA = getValidPosition(a);
+    const positionB = getValidPosition(b);
 
-    if (!Number.isFinite(positionA)) return 1;
-    if (!Number.isFinite(positionB)) return -1;
+    if (positionA === null && positionB === null) return 0;
+    if (positionA === null) return 1;
+    if (positionB === null) return -1;
 
     return positionA - positionB;
   });
@@ -422,7 +765,7 @@ function renderResults(results, drivers) {
     const status = getResultStatus(result);
     const statusClass = getStatusClass(status);
 
-    const position = result.position ?? "—";
+    const position = getValidPosition(result) ?? "—";
     const number = result.driver_number ?? "—";
     const laps = result.number_of_laps ?? "—";
 
@@ -468,6 +811,15 @@ function renderResults(results, drivers) {
   });
 
   resultsContainer.innerHTML = `
+    ${renderRaceIdentity(session, sortedResults.length)}
+
+    ${renderRaceSummary(sortedResults, driverMap)}
+
+    <div class="panel-head results-classification-header">
+      <h2>Final Classification</h2>
+      <span class="tag">RACE RESULTS</span>
+    </div>
+
     <div class="results-table-wrapper">
       <table class="results-table">
         <thead>
@@ -535,12 +887,13 @@ async function loadResults() {
 
     if (version !== requestVersion) return;
 
-    renderResults(results, drivers);
+    renderResults(results, drivers, session);
 
     const label = session ? getSessionLabel(session) : "Grand Prix";
 
     setStatus(
-      `${label}: ${results.length} tay đua.`
+      `${label}: ${results.length} tay đua.`,
+      "success"
     );
   } catch (error) {
     if (version !== requestVersion) return;

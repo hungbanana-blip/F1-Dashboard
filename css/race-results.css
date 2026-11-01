@@ -644,3 +644,572 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   20. RACE RESULTS — COMPACT REDESIGN
+   Preserves the original sections 1–19 above.
+   ============================================================ */
+
+/* Compact selector: two controls side-by-side, refresh full width. */
+#race-results-page .schedule-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: #141820;
+  border: 1px solid var(--rr-border);
+  border-radius: 12px;
+}
+
+#race-results-page .schedule-controls label {
+  width: 100%;
+  min-width: 0;
+  gap: 5px;
+  font-size: 0.7rem;
+}
+
+#race-results-page .schedule-controls select,
+#race-results-page #resultsSession {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 40px;
+}
+
+#race-results-page #resultsRefresh {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+}
+
+/* Status should read as a compact message, not another large panel. */
+#race-results-page #resultsStatus {
+  margin: 8px 2px 14px;
+  font-size: 0.78rem;
+}
+
+#race-results-page #resultsStatus[data-state="success"] {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 4px 9px;
+  color: var(--rr-green);
+  background: rgba(53, 211, 154, 0.09);
+  border: 1px solid rgba(53, 211, 154, 0.2);
+  border-radius: 999px;
+}
+
+/* Race Summary */
+#race-results-page .race-summary {
+  width: 100%;
+  min-width: 0;
+  margin: 12px 0 16px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+#race-results-page .race-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+#race-results-page .race-summary-header h3,
+#race-results-page .race-summary-podium h4 {
+  margin: 0;
+  color: var(--rr-text);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.025em;
+}
+
+#race-results-page .race-summary-header > span {
+  color: var(--rr-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+#race-results-page .race-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+#race-results-page .race-summary-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 12px;
+  background: var(--rr-surface);
+  border: 1px solid var(--rr-border-soft);
+  border-radius: 9px;
+}
+
+#race-results-page .race-summary-label {
+  color: var(--rr-muted);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+}
+
+#race-results-page .race-summary-card > strong {
+  color: var(--rr-text);
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+#race-results-page .race-summary-card > small {
+  color: var(--rr-muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* Podium: horizontal on wide screens, stacked on narrow screens. */
+#race-results-page .race-summary-podium {
+  margin-top: 14px;
+}
+
+#race-results-page .race-summary-podium h4 {
+  margin-bottom: 8px;
+}
+
+#race-results-page .race-summary-podium-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+#race-results-page .race-summary-podium-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  min-height: 62px;
+  padding: 10px;
+  background: var(--rr-surface);
+  border: 1px solid var(--rr-border-soft);
+  border-radius: 9px;
+}
+
+#race-results-page .race-summary-position {
+  flex-shrink: 0;
+  color: var(--rr-text);
+  font-size: 0.88rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+#race-results-page .race-summary-team-color {
+  display: block;
+  flex: 0 0 4px;
+  height: 34px;
+  border-radius: 4px;
+}
+
+#race-results-page .race-summary-driver {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+#race-results-page .race-summary-driver strong {
+  overflow: hidden;
+  color: var(--rr-text);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#race-results-page .race-summary-driver small {
+  overflow: hidden;
+  color: var(--rr-muted);
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#race-results-page .race-summary-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid var(--rr-border-soft);
+}
+
+#race-results-page .race-summary-footer span {
+  color: var(--rr-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+#race-results-page .race-summary-footer strong {
+  color: var(--rr-text);
+  font-size: 0.82rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Classification heading remains visually distinct from the summary. */
+#race-results-page .results-table-wrapper {
+  margin-top: 0;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  #race-results-page .race-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #race-results-page .race-summary-podium-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #race-results-page .schedule-controls {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  #race-results-page .race-summary {
+    margin-top: 10px;
+    margin-bottom: 14px;
+  }
+
+  #race-results-page .race-summary-card {
+    min-height: 82px;
+    padding: 10px;
+  }
+
+  #race-results-page .race-summary-card > strong {
+    font-size: 1.2rem;
+  }
+
+  #race-results-page .race-summary-header h3 {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 360px) {
+  #race-results-page .schedule-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #race-results-page #resultsRefresh {
+    grid-column: 1;
+  }
+
+  #race-results-page .race-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* ============================================================
+   21. RACE IDENTITY
+   Race event information: flag, Grand Prix, circuit, location
+   ============================================================ */
+
+#race-results-page .race-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  width: 100%;
+  min-width: 0;
+
+  margin: 12px 0 16px;
+  padding: 16px 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1B202A 0%,
+      #141820 100%
+    );
+
+  border: 1px solid var(--rr-border);
+  border-radius: 12px;
+}
+
+#race-results-page .race-identity-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  min-width: 0;
+}
+
+#race-results-page .race-identity-flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+
+  font-size: 38px;
+  line-height: 1;
+
+  background: var(--rr-surface-alt);
+  border: 1px solid var(--rr-border-soft);
+  border-radius: 10px;
+}
+
+#race-results-page .race-identity-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+#race-results-page .race-identity-eyebrow {
+  margin-bottom: 5px;
+
+  color: var(--rr-muted);
+
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+#race-results-page .race-identity-title {
+  margin: 0;
+
+  color: var(--rr-text);
+
+  font-size: 1.2rem;
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+
+  overflow-wrap: anywhere;
+}
+
+#race-results-page .race-identity-circuit {
+  margin-top: 6px;
+
+  color: #D5DAE3;
+
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+#race-results-page .race-identity-location {
+  margin-top: 3px;
+
+  color: var(--rr-muted);
+
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.4;
+}/* ------------------------------------------------------------
+   RACE IDENTITY — EVENT METADATA
+   ------------------------------------------------------------ */
+
+#race-results-page .race-identity-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  padding-top: 13px;
+
+  border-top: 1px solid var(--rr-border-soft);
+}
+
+#race-results-page .race-identity-meta > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  min-width: 0;
+}
+
+#race-results-page .race-identity-meta span {
+  color: var(--rr-muted);
+
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+#race-results-page .race-identity-meta strong {
+  color: var(--rr-text);
+
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------
+   RACE IDENTITY — HOVER / FOCUS
+   ------------------------------------------------------------ */
+
+#race-results-page .race-identity,
+#race-results-page .race-identity * {
+  box-sizing: border-box;
+}
+
+#race-results-page .race-identity-title,
+#race-results-page .race-identity-circuit,
+#race-results-page .race-identity-location {
+  overflow-wrap: anywhere;
+}
+
+/* ------------------------------------------------------------
+   RACE IDENTITY — CLASSIFICATION HEADER
+   ------------------------------------------------------------ */
+
+#race-results-page .results-classification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  margin: 18px 0 10px;
+  padding: 0;
+}
+
+#race-results-page .results-classification-header h2 {
+  margin: 0;
+
+  color: var(--rr-text);
+
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+#race-results-page .results-classification-header .tag {
+  flex-shrink: 0;
+
+  color: var(--rr-muted);
+
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}/* ============================================================
+   22. RACE IDENTITY — RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  #race-results-page .race-identity {
+    gap: 13px;
+    padding: 14px;
+  }
+
+  #race-results-page .race-identity-flag {
+    flex-basis: 48px;
+    width: 48px;
+    height: 48px;
+    font-size: 33px;
+  }
+
+  #race-results-page .race-identity-title {
+    font-size: 1.05rem;
+  }
+
+  #race-results-page .race-identity-meta {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  #race-results-page .race-identity {
+    margin-top: 10px;
+    margin-bottom: 14px;
+    padding: 12px;
+    border-radius: 9px;
+  }
+
+  #race-results-page .race-identity-main {
+    gap: 11px;
+  }
+
+  #race-results-page .race-identity-flag {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    font-size: 29px;
+    border-radius: 8px;
+  }
+
+  #race-results-page .race-identity-title {
+    font-size: 0.95rem;
+  }
+
+  #race-results-page .race-identity-circuit {
+    font-size: 0.77rem;
+  }
+
+  #race-results-page .race-identity-location {
+    font-size: 0.7rem;
+  }
+
+  #race-results-page .race-identity-meta {
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  #race-results-page .race-identity-meta span {
+    font-size: 0.59rem;
+  }
+
+  #race-results-page .race-identity-meta strong {
+    font-size: 0.72rem;
+  }
+
+  #race-results-page .results-classification-header h2 {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 360px) {
+  #race-results-page .race-identity {
+    padding: 10px;
+  }
+
+  #race-results-page .race-identity-main {
+    align-items: flex-start;
+    gap: 9px;
+  }
+
+  #race-results-page .race-identity-flag {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+    font-size: 25px;
+  }
+
+  #race-results-page .race-identity-title {
+    font-size: 0.85rem;
+  }
+
+  #race-results-page .race-identity-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

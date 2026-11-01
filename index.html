@@ -75,7 +75,11 @@
 
   <!-- MAIN CONTENT -->
   <main>
-    <!-- CHAMPIONSHIP PAGE -->
+
+    <!-- ======================================================
+         CHAMPIONSHIP PAGE
+         ====================================================== -->
+
     <section
       id="championship-page"
       aria-labelledby="championship-heading"
@@ -114,6 +118,7 @@
       </div>
 
       <div class="grid">
+
         <!-- DRIVER CHAMPIONSHIP -->
         <section
           class="panel"
@@ -153,10 +158,15 @@
             </div>
           </div>
         </section>
+
       </div>
     </section>
 
-    <!-- RACE SCHEDULE PAGE -->
+
+    <!-- ======================================================
+         RACE SCHEDULE PAGE
+         ====================================================== -->
+
     <section
       id="schedule-page"
       aria-labelledby="schedule-heading"
@@ -175,6 +185,7 @@
         aria-label="Schedule settings"
       >
         <div class="schedule-controls">
+
           <label for="scheduleYear">
             Season
 
@@ -234,9 +245,11 @@
           >
             ↻ Refresh schedule
           </button>
+
         </div>
 
         <div class="schedule-info">
+
           <div
             id="scheduleStatus"
             class="status"
@@ -253,6 +266,7 @@
           >
             Times are converted to the selected timezone.
           </div>
+
         </div>
       </section>
 
@@ -268,9 +282,14 @@
           </div>
         </div>
       </div>
+
     </section>
 
-    <!-- RACE RESULTS PAGE -->
+
+    <!-- ======================================================
+         RACE RESULTS PAGE
+         ====================================================== -->
+
     <section
       id="race-results-page"
       aria-labelledby="race-results-heading"
@@ -289,7 +308,9 @@
         class="panel"
         aria-label="Race result filters"
       >
+
         <div class="schedule-controls">
+
           <label for="resultsYear">
             Season
 
@@ -322,9 +343,11 @@
           >
             ↻ Refresh results
           </button>
+
         </div>
 
         <div class="schedule-info">
+
           <div
             id="resultsStatus"
             class="status"
@@ -333,30 +356,43 @@
           >
             Select a Grand Prix to load race results.
           </div>
+
         </div>
+
       </section>
 
-      <!-- RACE RESULT TABLE -->
+
+      <!-- RACE RESULTS CONTENT -->
       <section
         class="panel"
-        aria-labelledby="results-table-heading"
+        aria-label="Race results and classification"
       >
-        <div class="panel-head">
-          <h2 id="results-table-heading">
-            Final Classification
-          </h2>
 
-          <span class="tag">RACE RESULTS</span>
-        </div>
+        <!--
+          Race Summary and Final Classification
+          are rendered by race-results.js.
 
-        <div id="raceResults" aria-live="polite">
+          Required order:
+          1. Race Summary
+          2. Final Classification heading
+          3. Results table
+        -->
+
+        <div
+          id="raceResults"
+          aria-live="polite"
+        >
           <div class="empty">
             Race results have not been loaded yet.
           </div>
         </div>
+
       </section>
+
     </section>
+
   </main>
+
 
   <!-- FOOTER -->
   <footer id="app-footer">
@@ -367,5 +403,6 @@
       Verify official session times before relying on them.
     </p>
   </footer>
+
 </body>
 </html>

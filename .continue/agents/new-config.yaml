@@ -1,0 +1,17 @@
+name: DeepSeek Local
+version: 1.0.0
+schema: v1
+
+models:
+  - name: DeepSeek Coder V2 Lite
+    provider: lmstudio
+    model: deepseek-coder-v2-lite-instruct
+    apiBase: http://localhost:1234/v1
+    roles:
+      - chat
+      - edit
+      - apply
+    defaultCompletionOptions:
+      contextLength: 32768
+      maxTokens: 4096
+      temperature: 0.2
